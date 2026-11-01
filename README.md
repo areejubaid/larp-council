@@ -351,6 +351,8 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 
 * November 1, 2026 (status check): Part A voices saved and linked, queue plus retry added for the ElevenLabs free plan limit. Part B Brain merged to main (offline mode plus optional Claude, HTTP server). Part C Experience pushed on branch `part-c-experience`, not merged to main yet. Brain to Hub to Voice flow tested together in mock mode and works.
 
+* November 1, 2026 (3 PM): finish plan in `plan.md`. Branch `ready` combines main with Part C. Design sources: GSAP and Taste Skill used (see `tools/design-kit.mjs` and `design/`); 21st.dev and ThreeUI MCPs need paid keys, CreatorFlow is not a design tool. Design pass and demo readiness in progress.
+
 ## 16. Sources
 
 * ElevenLabs Voice Design: https://elevenlabs.io/docs/eleven-api/guides/how-to/voices/voice-design.mdx
