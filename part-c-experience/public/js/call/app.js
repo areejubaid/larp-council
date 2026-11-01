@@ -263,16 +263,22 @@ function vibeOf(turn) {
   if (turn.mood === 'annoyed') return 'roast';
   return '';
 }
-/** Shows the tag and plays a sound. Returns how long the sound lasts so the caller can wait before the next voice. */
+/** Big centered aura popup plus a sound. Returns how long the sound lasts so the caller can wait before the next voice. */
 function reactionPopup(speakerId, vibe) {
-  const tile = tiles.get(speakerId);
-  if (!tile || !vibe) return 0;
+  if (!vibe) return 0;
   const hype = vibe === 'hype';
   const pool = hype ? HYPE_TAGS : ROAST_TAGS;
-  const tag = el('div', 'react ' + (hype ? 'react-hype' : 'react-roast'), (hype ? '\u2728 ' : '\uD83D\uDC80 ') + pool[Math.floor(Math.random() * pool.length)]);
-  tag.setAttribute('aria-hidden', 'true');
-  tile.appendChild(tag);
-  setTimeout(() => tag.remove(), 2800);
+  const p = personaById(speakerId);
+  const kind = hype ? 'aura-hype' : 'aura-roast';
+  const flash = el('div', 'aura-flash ' + kind);
+  const pop = el('div', 'aura-pop ' + kind);
+  pop.style.setProperty('--c', safeColor(p?.color));
+  pop.append(el('div', 'aura-who', p?.name ?? speakerId),
+    el('div', 'aura-text', (hype ? '\u2728 ' : '\uD83D\uDC80 ') + pool[Math.floor(Math.random() * pool.length)]));
+  pop.setAttribute('aria-hidden', 'true');
+  flash.setAttribute('aria-hidden', 'true');
+  document.body.append(flash, pop);
+  setTimeout(() => { pop.remove(); flash.remove(); }, 2800);
   return playSfx(vibe);
 }
 function setStatus(text) { $('captions-status').textContent = text; }

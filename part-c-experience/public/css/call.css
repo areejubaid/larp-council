@@ -124,7 +124,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .timer { font-variant-numeric: tabular-nums; font-weight: 600; background: var(--tile); border: 1px solid var(--line); padding: 6px 14px; border-radius: 999px; font-size: .9375rem; }
 
 .stage { display: flex; gap: 12px; min-height: 0; padding: 0 var(--gutter) 8px; }
-.grid-wrap { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.grid-wrap { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
 .grid { display: grid; gap: 12px; height: 100%; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); }
 .grid[data-count="1"], .grid[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -274,8 +274,11 @@ button, input, textarea { font: inherit; color: inherit; }
   .ctl-mic { order: 2; }
   .ctl-group { order: 3; flex: 1; justify-content: flex-end; gap: 8px; }
   .panel { position: fixed; inset: 60px 0 0 0; width: auto; z-index: 30; border-radius: 20px 20px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, .6); }
-  .grid, .grid[data-count] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(140px, 1fr); height: auto; min-height: 100%; }
-  .grid[data-count="5"] .tile, .grid[data-count="5"] .tile:nth-child(4), .grid[data-count="5"] .tile:nth-child(n) { grid-column: auto; }
+}
+@media (max-width: 560px) {
+  /* phones in portrait: two columns, still always inside the screen */
+  .grid[data-count] { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); height: 100%; gap: 8px; }
+  .grid[data-count="5"] .tile, .grid[data-count="5"] .tile:nth-child(4) { grid-column: auto; }
   .grid[data-count="5"] .tile:nth-child(5), .grid[data-count="3"] .tile:last-child { grid-column: 1 / -1; }
 }
 @media (max-width: 640px) {
@@ -291,7 +294,16 @@ button, input, textarea { font: inherit; color: inherit; }
   .tile-role { display: none; }
   .toast { bottom: 190px; }
 }
-@media (max-height: 560px) { .captions { min-height: 0; } .notice { display: none; } }
+@media (max-height: 760px) {
+  .call-top { padding-top: 8px; padding-bottom: 8px; min-height: 44px; }
+  .captions { min-height: 0; padding-bottom: 6px; }
+  .captions-body { font-size: clamp(.9375rem, 2vw, 1.125rem); padding: 8px 14px; max-height: 4.6em; }
+  .controls-wrap { padding-top: 8px; gap: 4px; }
+  .ctl { height: 42px; }
+  .stage { padding-bottom: 6px; }
+  .grid { gap: 8px; }
+}
+@media (max-height: 560px) { .notice { display: none; } .tile-label { padding: 3px 9px; font-size: .8125rem; } .tile-role { display: none; } .tile-mic { width: 28px; height: 28px; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -313,9 +325,21 @@ button, input, textarea { font: inherit; color: inherit; }
 @keyframes statuspulse { 50% { opacity: .6; } }
 @media (prefers-reduced-motion: reduce) { .captions-status:not(:empty) { animation: none; } }
 
-/* LARP reaction tags */
-.react { position: absolute; left: 50%; top: 18%; z-index: 5; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: clamp(1rem, 2.4cqw, 1.5rem); letter-spacing: .01em; pointer-events: none; white-space: nowrap; animation: reactfloat 2.4s cubic-bezier(.2,.8,.2,1) forwards; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
-.react-hype { background: #b7f35a; color: #12210a; }
-.react-roast { background: #ff5d5d; color: #2a0505; }
-@keyframes reactfloat { 0% { opacity: 0; transform: translate(-50%, 24px) scale(.6) rotate(-4deg); } 14% { opacity: 1; transform: translate(-50%, 0) scale(1.15) rotate(2deg); } 24% { transform: translate(-50%, -4px) scale(1) rotate(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70px) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .react { animation: reactfade 2.4s forwards; } @keyframes reactfade { 0%, 80% { opacity: 1; transform: translateX(-50%); } 100% { opacity: 0; transform: translateX(-50%); } } }
+/* LARP aura popup: big, centered on the screen */
+.aura-pop { position: fixed; left: 50%; top: 40%; z-index: 60; transform: translate(-50%, -50%); pointer-events: none; display: grid; justify-items: center; gap: 10px; text-align: center; animation: aurapop 2.6s cubic-bezier(.2, .9, .2, 1) forwards; }
+.aura-who { font-weight: 700; font-size: clamp(.9375rem, 2.2vw, 1.25rem); padding: 6px 16px; border-radius: 999px; background: rgba(8, 10, 16, .85); color: #fff; border: 2px solid var(--c, #fff); }
+.aura-text { font-weight: 900; font-size: clamp(2.4rem, 9vw, 6.5rem); line-height: 1; letter-spacing: -.02em; padding: .12em .42em .16em; border-radius: .3em; white-space: nowrap; box-shadow: 0 18px 60px rgba(0, 0, 0, .55); }
+.aura-hype .aura-text { background: #c8f169; color: #14210a; box-shadow: 0 0 0 4px rgba(200, 241, 105, .35), 0 0 80px rgba(200, 241, 105, .55), 0 18px 60px rgba(0, 0, 0, .55); }
+.aura-roast .aura-text { background: #ff4d5a; color: #fff; box-shadow: 0 0 0 4px rgba(255, 77, 90, .35), 0 0 80px rgba(255, 77, 90, .55), 0 18px 60px rgba(0, 0, 0, .55); }
+.aura-flash { position: fixed; inset: 0; z-index: 55; pointer-events: none; animation: auraflash 1.2s ease-out forwards; }
+.aura-flash.aura-hype { background: radial-gradient(circle at 50% 42%, rgba(200, 241, 105, .22), transparent 60%); }
+.aura-flash.aura-roast { background: radial-gradient(circle at 50% 42%, rgba(255, 77, 90, .26), transparent 60%); }
+@keyframes aurapop {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(.4) rotate(-6deg); }
+  12% { opacity: 1; transform: translate(-50%, -50%) scale(1.18) rotate(3deg); }
+  22% { transform: translate(-50%, -50%) scale(1) rotate(-1deg); }
+  78% { opacity: 1; transform: translate(-50%, -52%) scale(1) rotate(0); }
+  100% { opacity: 0; transform: translate(-50%, -85%) scale(1.02); }
+}
+@keyframes auraflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .aura-pop, .aura-flash { animation: auralite 2.6s forwards !important; } @keyframes auralite { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
