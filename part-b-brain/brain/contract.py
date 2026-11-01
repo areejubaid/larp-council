@@ -67,3 +67,90 @@ def validate_event(e):
     _need(e.get("type") in EVENT_TYPES, f"unknown event type {e.get('type')}")
     _need(isinstance(e.get("payload"), dict), "payload must be an object")
     return e
+
+
+# ---------------------------------------------------------------------------
+# Turn contract version 2 (LARP Council): POST /turn
+# ---------------------------------------------------------------------------
+TURN_MOODS = ("curious", "skeptical", "impressed", "annoyed", "supportive")
+TURN_STANCES = ("question", "agree", "disagree", "challenge", "advice")
+MAX_IDEA_CHARS = 2000
+MAX_TEXT_CHARS = 2000
+MAX_HISTORY = 60
+
+
+def validate_turn_request(r, known_ids):
+    """Check a /turn request and return a normalized copy. Raises ValueError on bad input."""
+    _need(isinstance(r, dict), "request must be a JSON object")
+    sid = r.get("sessionId", "s1")
+    _need(isinstance(sid, str) and sid.strip(), "sessionId must be a non-empty string")
+    idea = r.get("idea")
+    _need(isinstance(idea, str) and idea.strip(), "idea is required")
+    _need(len(idea) <= MAX_IDEA_CHARS, f"idea must be at most {MAX_IDEA_CHARS} characters")
+    personas = r.get("personas", list(known_ids))
+    _need(isinstance(personas, list) and personas, "personas must be a non-empty list of ids")
+    for p in personas:
+        _need(isinstance(p, str) and p in known_ids, f"unknown persona {p!r}; known: {', '.join(known_ids)}")
+    personas = list(dict.fromkeys(personas))
+    history = r.get("history", [])
+    _need(isinstance(history, list), "history must be a list")
+    _need(len(history) <= MAX_HISTORY, f"history must have at most {MAX_HISTORY} items")
+    clean = []
+    for h in history:
+        _need(isinstance(h, dict), "each history item must be an object")
+        sp, tx = h.get("speaker"), h.get("text")
+        _need(isinstance(sp, str) and sp.strip(), "history speaker must be a string")
+        _need(isinstance(tx, str), "history text must be a string")
+        _need(len(tx) <= MAX_TEXT_CHARS, f"history text must be at most {MAX_TEXT_CHARS} characters")
+        clean.append({"speaker": sp, "text": tx})
+    end = r.get("endCall", False)
+    _need(isinstance(end, bool), "endCall must be a boolean")
+    return {"sessionId": sid, "idea": idea.strip(), "personas": personas, "history": clean, "endCall": end}
+
+
+def validate_turn(t, known_ids):
+    _need(isinstance(t, dict), "turn must be an object")
+    _need(t.get("speaker") in known_ids, "turn.speaker must be a persona id")
+    _need(isinstance(t.get("text"), str) and t["text"].strip(), "turn.text must be a non-empty string")
+    _need(len(t["text"]) <= 800, "turn.text too long")
+    _need(t.get("mood") in TURN_MOODS, f"turn.mood must be one of {TURN_MOODS}")
+    _need(t.get("stance") in TURN_STANCES, f"turn.stance must be one of {TURN_STANCES}")
+    _need(t.get("replyTo") == "user" or t.get("replyTo") in known_ids, "turn.replyTo must be 'user' or a persona id")
+    return t
+
+
+def validate_summary(s, known_ids):
+    _need(isinstance(s, dict), "summary must be an object")
+    _need(isinstance(s.get("verdict"), str) and s["verdict"].strip(), "summary.verdict required")
+    pp = s.get("perPersona")
+    _need(isinstance(pp, list) and pp, "summary.perPersona must be a non-empty list")
+    for p in pp:
+        _need(isinstance(p, dict) and p.get("speaker") in known_ids, "perPersona.speaker must be a persona id")
+        _need(isinstance(p.get("take"), str) and p["take"].strip(), "perPersona.take required")
+        _need(isinstance(p.get("score"), int) and not isinstance(p["score"], bool) and 1 <= p["score"] <= 10,
+              "perPersona.score must be an int 1-10")
+    ns = s.get("nextSteps")
+    _need(isinstance(ns, list) and len(ns) == 3 and all(isinstance(x, str) and x.strip() for x in ns),
+          "summary.nextSteps must be 3 non-empty strings")
+    return s
+
+
+def validate_turn_response(resp, known_ids):
+    """Check a /turn response against contract v2. Raises ValueError on any violation."""
+    _need(isinstance(resp, dict), "response must be an object")
+    turns = resp.get("turns")
+    _need(isinstance(turns, list), "turns must be a list")
+    _need(isinstance(resp.get("awaitingUser"), bool), "awaitingUser must be a boolean")
+    _need(isinstance(resp.get("done"), bool), "done must be a boolean")
+    if resp["done"]:
+        _need(len(turns) <= 2, "turns must have at most 2 items")
+        _need(resp["awaitingUser"] is False, "awaitingUser must be false when done")
+        validate_summary(resp.get("summary"), known_ids)
+    else:
+        _need(1 <= len(turns) <= 2, "turns must have 1 or 2 items")
+        _need(resp.get("summary") is None, "summary must be null until done")
+    for t in turns:
+        validate_turn(t, known_ids)
+    if resp["awaitingUser"]:
+        _need(turns and "?" in turns[-1]["text"], "when awaitingUser is true the last turn must ask a question")
+    return resp

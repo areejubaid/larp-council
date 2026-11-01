@@ -2,7 +2,9 @@
 
 Start command:  python server.py          (reads PORT, which Render sets)
 
-GET  /health  ->  {"ok": true, "llm": bool}
+GET  /health  ->  {"ok": true, "llm": bool, "provider": "anthropic" | "featherless" | "offline"}
+GET  /personas ->  [{"id", "name", "role", "lens", "color"}, ...]
+POST /turn    ->  LARP Council turn contract v2 (see README)
 POST /run     ->  body: PitchInput JSON
                   reply: {"script": DebateScript, "events": [Event, ...]}
 """
@@ -10,11 +12,12 @@ import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from brain import llm
+from brain import conversation, llm
 from brain.events import Emitter
 from brain.pipeline import run
 
 MAX_BODY = 20_000  # bytes; a pitch is a few paragraphs
+MAX_TURN_BODY = 60_000  # bytes; /turn carries the whole conversation history
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -35,25 +38,30 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
-            self._send(200, {"ok": True, "llm": llm.available()})
+            self._send(200, {"ok": True, "llm": llm.provider() != "offline", "provider": llm.provider()})
+        elif self.path == "/personas":
+            self._send(200, conversation.list_personas())
         else:
-            self._send(404, {"error": "not found; try GET /health or POST /run"})
+            self._send(404, {"error": "not found; try GET /health, GET /personas, POST /turn or POST /run"})
 
     def do_POST(self):
-        if self.path != "/run":
-            return self._send(404, {"error": "not found; try POST /run"})
+        if self.path not in ("/run", "/turn"):
+            return self._send(404, {"error": "not found; try POST /turn or POST /run"})
         try:
             length = int(self.headers.get("Content-Length", 0))
-            if length <= 0 or length > MAX_BODY:
-                return self._send(400, {"error": f"body must be 1-{MAX_BODY} bytes"})
+            limit = MAX_TURN_BODY if self.path == "/turn" else MAX_BODY
+            if length <= 0 or length > limit:
+                return self._send(400, {"error": f"body must be 1-{limit} bytes"})
             pitch_input = json.loads(self.rfile.read(length))
+            if self.path == "/turn":
+                return self._send(200, conversation.next_turns(pitch_input))
             emitter = Emitter(str(pitch_input.get("sessionId", "s1")) if isinstance(pitch_input, dict) else "s1")
             script = run(pitch_input, emitter)
             self._send(200, {"script": script, "events": emitter.events})
         except (ValueError, json.JSONDecodeError) as e:  # bad input, including contract violations
             self._send(400, {"error": str(e)})
         except Exception as e:  # never leak a stack trace to the browser
-            print(f"/run failed: {e!r}", flush=True)
+            print(f"{self.path} failed: {e!r}", flush=True)
             self._send(500, {"error": "internal error"})
 
     def log_message(self, fmt, *args):
@@ -66,5 +74,5 @@ def make_server(port: int) -> ThreadingHTTPServer:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    print(f"Brain listening on :{port} (llm={'on' if llm.available() else 'offline'})", flush=True)
+    print(f"Brain listening on :{port} (provider={llm.provider()})", flush=True)
     make_server(port).serve_forever()

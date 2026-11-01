@@ -102,3 +102,38 @@ Not tested on Render yet (needs the account and a deploy).
 3. **`mood` values** are `slow_clap`, `impressed`, `skeptical`, `sarcastic`, `appalled`.
 4. **Source notes** in `brain/data/minds/*.json` are short honest notes on the kind of public source each principle is based on. They contain no links or quotes.
 5. In LARP mode the chosen mind is the player, so only the other minds speak.
+
+# LARP Council conversation engine (turn contract v2)
+
+The Brain also runs the LARP Council call: AI personas of Steve Jobs, Elon Musk, Sam Altman and Warren Buffett react to an idea, a project or a life decision. They are AI simulations built from public interviews, talks and writing, not the real people, and nothing they say is a real quote.
+
+## Endpoints
+
+- `GET /personas` returns `[{"id", "name", "role", "lens", "color"}]` for `jobs`, `musk`, `altman`, `buffett`.
+- `POST /turn` takes `{"sessionId", "idea", "personas", "history", "endCall"}` and returns `{"turns", "awaitingUser", "done", "summary"}`. Only `idea` is required. `history` is a list of `{"speaker", "text"}` where the user is `"user"`; it is empty on the first call and the newest user answer is last. Each turn has `speaker`, `text`, `mood` (curious, skeptical, impressed, annoyed, supportive), `stance` (question, agree, disagree, challenge, advice) and `replyTo` (`"user"` or a persona id). The server returns 1 or 2 turns, and the last one asks the user a question. When `endCall` is true, or after 5 user answers, it returns `done: true`, one short closing turn, and a `summary` with `verdict`, `perPersona` (take and score 1 to 10) and 3 `nextSteps`.
+- `GET /health` now also returns `"provider": "anthropic" | "featherless" | "offline"`.
+- Bad input gets a 400 with `{"error": "..."}`. The `/turn` body limit is 60000 bytes. CORS is open.
+
+```
+curl -X POST localhost:8000/turn -H "Content-Type: application/json" -d "{\"sessionId\":\"s1\",\"idea\":\"Google Maps for jobs\"}"
+```
+
+## LLM providers and env vars
+
+The first available provider wins, and any error or invalid output falls back to the offline engine, so a call never breaks.
+
+- `ANTHROPIC_API_KEY`: use Anthropic. `BRAIN_MODEL` picks the model (default `claude-sonnet-5-5`). Needs `pip install anthropic`.
+- `FEATHERLESS_API_KEY`: use Featherless through its OpenAI compatible API. `FEATHERLESS_MODEL` picks the model (default `meta-llama/Meta-Llama-3.1-70B-Instruct`). Uses only the standard library.
+- Neither key: offline engine. It classifies the idea as a startup or a life decision, pulls key words from the idea and the latest answer, and fills persona specific templates with a seeded random from `sessionId` plus the turn count, so a session is repeatable and different ideas get different conversations.
+- `BRAIN_OFFLINE=1` forces offline even when a key is set.
+
+Provider calls time out after about 25 seconds and retry once on invalid JSON.
+
+## Files
+
+- `brain/data/personas/*.json`: profiles with principles paraphrased from public material, question habits, speaking style, what impresses and annoys them, and a list of source titles (no links, no quotes).
+- `brain/conversation.py`: `next_turns(request)`, speaker choice, LLM prompt and the offline path.
+- `brain/offline.py`: offline templates. `brain/textutil.py`: classification and key phrase extraction.
+- `brain/contract.py`: `validate_turn_request` and `validate_turn_response`.
+- `tests/test_conversation.py`: engine and HTTP tests.
+
