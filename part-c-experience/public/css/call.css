@@ -26,6 +26,8 @@ html, body { height: 100%; }
 body {
   margin: 0;
   background: radial-gradient(1200px 700px at 80% -10%, #1a2540 0%, transparent 60%), var(--bg);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--text);
   font: 400 16px/1.5 var(--font);
   -webkit-font-smoothing: antialiased;
