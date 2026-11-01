@@ -32,7 +32,7 @@ class Classification(unittest.TestCase):
 
     def test_life_and_startup_use_different_templates(self):
         life = conversation.next_turns(req("Should I quit my job to go back to school?"))["turns"][0]["text"]
-        self.assertIn("quitting my job", life)
+        self.assertIn("quitting your job", life)
         self.assertNotIn("users", life.lower())
 
 

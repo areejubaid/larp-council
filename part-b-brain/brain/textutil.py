@@ -86,7 +86,9 @@ def topic_phrase(idea: str, max_words: int = 9) -> str:
         rest = re.sub(r"^\s*i\s+(?:want|plan|am thinking|'m thinking|wanna)\s+to\s+", "", s, flags=re.I).split()
         if rest:
             s = " ".join([_gerund(rest[0])] + rest[1:])
-    words = s.split()[:max_words]
+    # Speak to the user: "my startup" becomes "your startup".
+    swap = {"my": "your", "me": "you", "i": "you", "i'm": "you're", "myself": "yourself", "mine": "yours", "our": "your", "we": "you", "us": "you"}
+    words = [swap.get(w.lower(), w) for w in s.split()[:max_words]]
     while len(words) > 2 and words[-1].lower().strip(",") in _TRAIL:
         words.pop()
     return " ".join(words).strip(" ,") or "this idea"
