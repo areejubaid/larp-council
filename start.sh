@@ -18,6 +18,10 @@ if [ -z "${ELEVENLABS_API_KEY:-}" ] && [ -t 0 ]; then
   if [ -n "$K" ]; then echo "ELEVENLABS_API_KEY=$K" >> .env; export ELEVENLABS_API_KEY="$K"; fi
 fi
 if [ -z "${FEATHERLESS_API_KEY:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -t 0 ]; then
+  printf "Paste your Anthropic API key (hidden, Enter to skip): "; read -rs K; echo
+  if [ -n "$K" ]; then echo "ANTHROPIC_API_KEY=$K" >> .env; export ANTHROPIC_API_KEY="$K"; fi
+fi
+if [ -z "${FEATHERLESS_API_KEY:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -t 0 ]; then
   printf "Paste your Featherless API key (hidden, Enter to skip): "; read -rs K; echo
   if [ -n "$K" ]; then echo "FEATHERLESS_API_KEY=$K" >> .env; export FEATHERLESS_API_KEY="$K"; fi
 fi

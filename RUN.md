@@ -5,7 +5,7 @@
 * `git pull` to get the latest version.
 * Keys are optional. `./start.sh` asks for them on the first run (hidden input) and saves them to `.env`, which is git-ignored.
   * `ELEVENLABS_API_KEY` for real voices. Without it the voices are mock tones.
-  * `FEATHERLESS_API_KEY` or `ANTHROPIC_API_KEY` for idea-specific answers. Without one the Brain uses canned offline answers.
+  * `ANTHROPIC_API_KEY` or `FEATHERLESS_API_KEY` for idea-specific answers (Anthropic wins if both are set). Without one the Brain uses canned offline answers.
 * To enter the keys again, delete `.env` and run `./start.sh`.
 
 ## Start
@@ -17,7 +17,7 @@
 * Press Ctrl+C to stop everything.
 
 ## Check it is healthy
-* `curl localhost:8001/health` should show `"provider": "featherless"` (or `anthropic`). `"offline"` means no LLM key.
+* `curl localhost:8001/health` should show `"provider": "anthropic"` (or `featherless`). `"offline"` means no LLM key.
 * `node tools/design-kit.mjs doctor` checks all three services.
 
 ## Tests

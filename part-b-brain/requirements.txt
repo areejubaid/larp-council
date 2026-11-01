@@ -1,1 +1,1 @@
-anthropic>=0.40
+# No packages needed: the Brain talks to Anthropic and Featherless over plain HTTP.

@@ -67,15 +67,34 @@ def extract_json(text: str):
     return json.loads(text[start:end + 1], strict=False)
 
 
-def _ask_anthropic(system: str, user: str, max_tokens: int) -> str:
-    import anthropic  # imported lazily so offline mode needs no install
+ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5-5"
 
-    client = anthropic.Anthropic()
-    msg = client.messages.create(
-        model=os.environ.get("BRAIN_MODEL", "claude-sonnet-5-5"), max_tokens=max_tokens, system=system,
-        messages=[{"role": "user", "content": user}],
+
+def _anthropic_call(system: str, user: str, max_tokens: int, timeout: float) -> str:
+    """Plain HTTP call to the Anthropic Messages API, so no SDK install is needed."""
+    body = json.dumps({
+        "model": os.environ.get("BRAIN_MODEL", DEFAULT_ANTHROPIC_MODEL),
+        "max_tokens": max_tokens,
+        "temperature": 0.8,
+        "system": system,
+        "messages": [{"role": "user", "content": user}],
+    }).encode()
+    req = urllib.request.Request(
+        os.environ.get("ANTHROPIC_BASE_URL", ANTHROPIC_URL), data=body, method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+            "anthropic-version": "2023-06-01",
+        },
     )
-    return "".join(b.text for b in msg.content if b.type == "text")
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        data = json.loads(r.read())
+    return "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
+
+
+def _ask_anthropic(system: str, user: str, max_tokens: int) -> str:
+    return _anthropic_call(system, user, max_tokens, 45)
 
 
 def _ask_featherless(system: str, user: str, max_tokens: int) -> str:
@@ -129,14 +148,7 @@ class LLMError(Exception):
 
 
 def _anthropic_text(system: str, user: str, max_tokens: int, timeout: float) -> str:
-    import anthropic  # lazy, so offline mode needs no install
-
-    client = anthropic.Anthropic(timeout=timeout, max_retries=0)
-    msg = client.messages.create(
-        model=os.environ.get("BRAIN_MODEL", MODEL), max_tokens=max_tokens, system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    return "".join(b.text for b in msg.content if b.type == "text")
+    return _anthropic_call(system, user, max_tokens, timeout)
 
 
 def _featherless_text(system: str, user: str, max_tokens: int, timeout: float) -> str:

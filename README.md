@@ -20,12 +20,12 @@ cd larp-council
 
 Open http://localhost:3000, type an idea (a startup, a project or a life decision) and press **Join the call**.
 
-The first run asks for two keys at a hidden prompt and saves them to `.env` (git-ignored, never committed):
+The first run asks for your keys at a hidden prompt and saves them to `.env` (git-ignored, never committed):
 
 | Key | What it does | Without it |
 | --- | --- | --- |
 | `ELEVENLABS_API_KEY` | real persona voices | mock beep tones |
-| `FEATHERLESS_API_KEY` (or `ANTHROPIC_API_KEY`) | idea-specific answers | canned offline answers |
+| `ANTHROPIC_API_KEY` (or `FEATHERLESS_API_KEY`) | idea-specific answers | canned offline answers |
 
 ## How a call works
 
