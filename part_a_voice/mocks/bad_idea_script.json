@@ -31,7 +31,7 @@
     {
       "lineId": "l3",
       "mindId": "operator",
-      "text": "[softly] I want to be fair to you. [pause] Your first hundred users are the people who were already in the room. [pause] And they are leaving.",
+      "text": "[softly] Okay, look, I wanna be fair here. [pause] Who's your first hundred users? [pause] [sighs] Yeah. The people who were already in the room. And they're leaving.",
       "mood": "skeptical",
       "interruptsLineId": null,
       "principleId": "first_users",
