@@ -1,4 +1,4 @@
-// Mind Council Event Hub: contract events in over HTTP, sessions out over WebSocket, static UI, demo replay.
+// LARP Council hub: contract events in over HTTP, sessions out over WebSocket, static UI, demo replay.
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -127,6 +127,52 @@ export async function triggerBrain(pitchInput, { brainUrl, timeoutMs = 75000, fe
   }
 }
 
+/** Brain base URL: BRAIN_BASE wins, else BRAIN_URL with a trailing /run (and slashes) removed. */
+export function deriveBrainBase(brainBase, brainUrl) {
+  const raw = (brainBase || brainUrl || '').trim();
+  if (!raw) return '';
+  return raw.replace(/\/+$/, '').replace(/\/run$/, '').replace(/\/+$/, '');
+}
+
+export const MAX_TURN_BODY_BYTES = 64 * 1024;
+
+/**
+ * Forward one request to the Brain base URL + path. Resolves {status, body} where body is parsed JSON.
+ * Brain down, timeout, 5xx or a non JSON reply all become a 502 with a clear error object.
+ * A Brain 4xx is passed through so the UI can show the Brain's own message.
+ */
+export async function proxyBrain(pathname, { brainBase, method = 'GET', body, timeoutMs = 75000, fetchImpl = fetch } = {}) {
+  if (!brainBase) return { status: 502, body: { error: 'brain_unavailable', message: 'The council brain is not configured (set BRAIN_URL or BRAIN_BASE).' } };
+  let res;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(Object.assign(new Error('timeout'), { name: 'TimeoutError' })), timeoutMs);
+  try {
+    res = await fetchImpl(brainBase + pathname, {
+      method,
+      headers: body === undefined ? {} : { 'content-type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: ctl.signal,
+    });
+  } catch (err) {
+    clearTimeout(timer);
+    const timeout = ctl.signal.aborted || err?.name === 'TimeoutError' || err?.name === 'AbortError';
+    return { status: 502, body: { error: 'brain_unavailable', message: timeout ? 'The council took too long to answer.' : 'The council brain is not reachable.' } };
+  }
+  let parsed;
+  try {
+    parsed = await res.json();
+  } catch {
+    clearTimeout(timer);
+    return { status: 502, body: { error: 'brain_bad_reply', message: 'The council brain sent a reply the hub could not read.' } };
+  }
+  clearTimeout(timer);
+  if (res.status >= 400 && res.status < 500) {
+    return { status: res.status, body: parsed && typeof parsed === 'object' ? parsed : { error: 'bad_request' } };
+  }
+  if (!res.ok) return { status: 502, body: { error: 'brain_error', message: `The council brain answered HTTP ${res.status}.` } };
+  return { status: 200, body: parsed };
+}
+
 async function serveStatic(req, res, publicDir, csp) {
   let rel;
   try {
@@ -167,6 +213,7 @@ export function createApp(opts = {}) {
     port: opts.port ?? Number(env.PORT ?? 3000),
     host: opts.host ?? '0.0.0.0',
     brainUrl: opts.brainUrl !== undefined ? opts.brainUrl : (env.BRAIN_URL || ''),
+    brainBase: deriveBrainBase(opts.brainBase !== undefined ? opts.brainBase : env.BRAIN_BASE, opts.brainUrl !== undefined ? opts.brainUrl : env.BRAIN_URL),
     brainTimeoutMs: opts.brainTimeoutMs ?? (Number(env.BRAIN_TIMEOUT_MS) > 0 ? Number(env.BRAIN_TIMEOUT_MS) : 75000),
     voiceUrl: normalizeOrigin(opts.voiceUrl !== undefined ? opts.voiceUrl : env.VOICE_URL),
     replaySpeed: opts.replaySpeed ?? (Number(env.REPLAY_SPEED) > 0 ? Number(env.REPLAY_SPEED) : 1),
@@ -188,7 +235,7 @@ export function createApp(opts = {}) {
       return res.end('ok');
     }
     if (p === '/api/config' && method === 'GET') {
-      return sendJson(res, 200, { replaySpeed: config.replaySpeed, brainConfigured: Boolean(config.brainUrl), voiceUrl: config.voiceUrl });
+      return sendJson(res, 200, { replaySpeed: config.replaySpeed, brainConfigured: Boolean(config.brainUrl || config.brainBase), voiceUrl: config.voiceUrl });
     }
     if (p === '/events') {
       if (method !== 'POST') return sendJson(res, 405, { error: 'POST only' });
@@ -197,6 +244,18 @@ export function createApp(opts = {}) {
       if (!v.ok) return sendJson(res, 400, { error: v.error });
       const env_ = hub.publish(body.sessionId, body);
       return sendJson(res, 200, { ok: true, seq: env_.seq });
+    }
+    if (p === '/api/personas') {
+      if (method !== 'GET' && method !== 'HEAD') return sendJson(res, 405, { error: 'GET only' });
+      const r = await proxyBrain('/personas', { brainBase: config.brainBase, timeoutMs: Math.min(config.brainTimeoutMs, 15000) });
+      return sendJson(res, r.status, r.body);
+    }
+    if (p === '/api/turn') {
+      if (method !== 'POST') return sendJson(res, 405, { error: 'POST only' });
+      const body = await readJson(req, MAX_TURN_BODY_BYTES);
+      if (!body || typeof body !== 'object' || Array.isArray(body)) return sendJson(res, 400, { error: 'body must be a JSON object' });
+      const r = await proxyBrain('/turn', { brainBase: config.brainBase, method: 'POST', body, timeoutMs: config.brainTimeoutMs });
+      return sendJson(res, r.status, r.body);
     }
     if (p === '/api/pitch') {
       if (method !== 'POST') return sendJson(res, 405, { error: 'POST only' });
@@ -315,7 +374,7 @@ export function createApp(opts = {}) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const app = createApp();
   app.listen().then((port) => {
-    console.log(`Mind Council hub listening on http://${app.config.host}:${port}`);
+    console.log(`LARP Council hub listening on http://${app.config.host}:${port}`);
     console.log(`Brain: ${app.config.brainUrl || 'not configured, /api/pitch falls back to demo replay'}; voice: ${app.config.voiceUrl || 'off'}; replay speed x${app.config.replaySpeed}`);
   });
   const stop = () => app.close().then(() => process.exit(0));

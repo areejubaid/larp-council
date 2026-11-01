@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Pitch an idea or a life decision to a live call with four AI personas. They push back, you answer, and you get a score and next steps.">
+  <title>LARP Council</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230d1017%22/%3E%3Crect x=%227%22 y=%227%22 width=%2210%22 height=%2210%22 rx=%223%22 fill=%22%23c8f169%22/%3E%3Crect x=%2219%22 y=%227%22 width=%226%22 height=%2210%22 rx=%223%22 fill=%22%23ff8a65%22/%3E%3Crect x=%227%22 y=%2219%22 width=%2210%22 height=%226%22 rx=%223%22 fill=%22%2380b8ff%22/%3E%3Crect x=%2219%22 y=%2219%22 width=%226%22 height=%226%22 rx=%223%22 fill=%22%23d9a6ff%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/call.css">
+</head>
+<body>
+  <a class="skip" href="#main-landing">Skip to the form</a>
+
+  <!-- Inline icon sprite: one stroke style everywhere -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5V6.5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15Z"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M9 9v2.5a3 3 0 0 0 4.6 2.5M15.5 10.5V6.5a3.5 3.5 0 0 0-6.8-1.2"/><path d="M5.5 11.5a6.5 6.5 0 0 0 10.2 5.3M18.5 11.5c0 .9-.2 1.7-.5 2.4M12 18v3M4 4l16 16"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-4.5 16-3.5-6.5L4 12Z"/><path d="m12 13.5 8-9.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5v-9Z"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.4-3.2 2.8-5 6-5s5.6 1.8 6 5"/><path d="M16 5.6a3.2 3.2 0 0 1 0 5.8M18 14.8c1.8.7 2.8 2.2 3 4.2"/></symbol>
+    <symbol id="i-hangup" viewBox="0 0 24 24"><path d="M3 14.5c5.5-4.5 12.5-4.5 18 0l-2.2 2.7-3.6-1.6v-2.4a9 9 0 0 0-6.4 0v2.4l-3.6 1.6L3 14.5Z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 5h11l-2.5 4L17 13H6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  </svg>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- ============ Landing ============ -->
+  <section id="screen-landing" class="screen landing" aria-labelledby="landing-title">
+    <header class="brandbar">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="15" height="15" rx="5" fill="#c8f169"/><rect x="21" y="3" width="8" height="15" rx="4" fill="#ff8a65"/><rect x="3" y="21" width="15" height="8" rx="4" fill="#80b8ff"/><rect x="21" y="21" width="8" height="8" rx="4" fill="#d9a6ff"/></svg>
+      <span class="wordmark">LARP Council</span>
+    </header>
+
+    <main id="main-landing" class="landing-main">
+      <div class="landing-copy">
+        <h1 id="landing-title">Pitch it to the council.</h1>
+        <p class="lede">Hop on a call with four AI personas. They ask the hard question, you answer by voice or text, and you leave with a score and next steps.</p>
+      </div>
+
+      <form id="join-form" class="join-card" novalidate>
+        <div class="field">
+          <label for="idea" class="field-label">What do you want the council's take on?</label>
+          <textarea id="idea" name="idea" rows="2" maxlength="400" autocomplete="off" placeholder="A startup idea, a project, or a life decision" aria-describedby="idea-error idea-help"></textarea>
+          <p id="idea-error" class="field-error" role="alert" hidden></p>
+          <p id="idea-help" class="field-help">Try one of these:</p>
+          <div class="chips" id="chips" role="group" aria-label="Example ideas">
+            <button type="button" class="chip" data-idea="Google Maps for jobs: see open jobs near you on a map">Google Maps for jobs</button>
+            <button type="button" class="chip" data-idea="Should I drop out to build my startup?">Should I drop out to build my startup?</button>
+            <button type="button" class="chip" data-idea="A subscription box for people who want to learn to cook one cuisine a month">Cooking subscription box</button>
+          </div>
+        </div>
+
+        <fieldset class="field who" id="who">
+          <legend class="field-label">Who joins the call</legend>
+          <div id="persona-list" class="persona-list" aria-live="polite">
+            <p class="state" id="persona-loading">Loading the council...</p>
+          </div>
+          <p id="persona-error" class="field-error" role="alert" hidden></p>
+          <div id="persona-retry-row" class="retry-row" hidden>
+            <button type="button" class="btn btn-secondary" id="persona-retry">Try again</button>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary btn-join" id="join-btn" disabled>
+          <span>Join the call</span>
+        </button>
+        <p class="notice notice-inline"><span class="badge">AI</span> AI simulations inspired by public interviews and writing. Not the real people. No real quotes.</p>
+      </form>
+    </main>
+  </section>
+
+  <!-- ============ Call ============ -->
+  <section id="screen-call" class="screen call" aria-label="LARP Council call" hidden>
+    <header class="call-top">
+      <div class="call-title">
+        <span class="live-dot" aria-hidden="true"></span>
+        <h2 id="call-title" class="call-title-text">Call</h2>
+      </div>
+      <div class="call-meta">
+        <span class="timer" id="timer" role="timer" aria-label="Meeting time">00:00</span>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="grid-wrap" id="grid-wrap">
+        <div class="grid" id="grid" role="list" aria-label="Participants"></div>
+      </div>
+
+      <aside class="panel" id="panel" aria-label="Call panel" hidden>
+        <div class="panel-head">
+          <div class="tabs" role="tablist" aria-label="Panel">
+            <button type="button" role="tab" class="tab" id="tab-chat" aria-selected="true" aria-controls="pane-chat">Transcript</button>
+            <button type="button" role="tab" class="tab" id="tab-people" aria-selected="false" aria-controls="pane-people" tabindex="-1">People</button>
+          </div>
+          <button type="button" class="icon-btn" id="panel-close" aria-label="Close panel"><svg class="ic"><use href="#i-close"/></svg></button>
+        </div>
+        <div class="pane" id="pane-chat" role="tabpanel" aria-labelledby="tab-chat">
+          <ol class="chat" id="chat" aria-label="Call transcript"></ol>
+          <p class="state" id="chat-empty">Nothing said yet. The first question is on its way.</p>
+        </div>
+        <div class="pane" id="pane-people" role="tabpanel" aria-labelledby="tab-people" hidden>
+          <ul class="people" id="people"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <div class="call-error" id="call-error" role="alert" hidden>
+      <p id="call-error-text">The council could not be reached.</p>
+      <button type="button" class="btn btn-primary btn-sm" id="retry-btn">Retry</button>
+    </div>
+
+    <div class="captions" id="captions-wrap">
+      <p class="captions-status" id="captions-status">Connecting...</p>
+      <div class="captions-body" id="captions" aria-live="polite" aria-atomic="true">
+        <span class="cap-speaker" id="cap-speaker"></span>
+        <span class="cap-text" id="cap-text"></span>
+      </div>
+    </div>
+
+    <div class="controls-wrap">
+      <div class="controls">
+        <button type="button" class="ctl ctl-mic" id="mic-btn" aria-pressed="false" aria-label="Answer by voice. Click to start or stop, or hold to talk.">
+          <svg class="ic"><use href="#i-mic"/></svg>
+        </button>
+        <form class="reply" id="reply-form" autocomplete="off">
+          <label for="reply" class="sr-only">Your reply</label>
+          <input type="text" id="reply" name="reply" maxlength="800" placeholder="Type your answer" enterkeyhint="send">
+          <button type="submit" class="btn btn-primary btn-send" id="send-btn" aria-label="Send reply"><svg class="ic"><use href="#i-send"/></svg><span class="btn-text">Send</span></button>
+        </form>
+        <div class="ctl-group">
+          <button type="button" class="ctl ctl-text" id="wrap-btn"><svg class="ic"><use href="#i-flag"/></svg><span>Wrap up</span></button>
+          <button type="button" class="ctl" id="chat-btn" aria-label="Open transcript" aria-expanded="false" aria-controls="panel"><svg class="ic"><use href="#i-chat"/></svg></button>
+          <button type="button" class="ctl" id="people-btn" aria-label="Open participants" aria-expanded="false" aria-controls="panel"><svg class="ic"><use href="#i-people"/></svg></button>
+          <button type="button" class="ctl ctl-leave" id="leave-btn" aria-label="Leave call"><svg class="ic"><use href="#i-hangup"/></svg><span class="leave-text">Leave call</span></button>
+        </div>
+      </div>
+      <p class="notice"><span class="badge">AI</span> AI simulations inspired by public interviews and writing. Not the real people. No real quotes.</p>
+    </div>
+  </section>
+
+  <!-- ============ Summary ============ -->
+  <section id="screen-summary" class="screen summary" aria-labelledby="summary-title" hidden>
+    <header class="brandbar">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="15" height="15" rx="5" fill="#c8f169"/><rect x="21" y="3" width="8" height="15" rx="4" fill="#ff8a65"/><rect x="3" y="21" width="15" height="8" rx="4" fill="#80b8ff"/><rect x="21" y="21" width="8" height="8" rx="4" fill="#d9a6ff"/></svg>
+      <span class="wordmark">LARP Council</span>
+    </header>
+    <main class="summary-main" id="main-summary" tabindex="-1" aria-live="polite">
+      <p class="summary-kicker" id="summary-idea"></p>
+      <h1 id="summary-title">The call has ended</h1>
+      <p class="verdict" id="summary-verdict"></p>
+
+      <h2 class="section-title">What each persona thought</h2>
+      <ul class="takes" id="summary-takes"></ul>
+
+      <h2 class="section-title">Next steps</h2>
+      <ol class="steps" id="summary-steps"></ol>
+
+      <div class="summary-actions">
+        <button type="button" class="btn btn-primary" id="new-call-btn"><svg class="ic"><use href="#i-plus"/></svg><span>New call</span></button>
+        <button type="button" class="btn btn-secondary" id="copy-btn"><svg class="ic"><use href="#i-copy"/></svg><span>Copy summary</span></button>
+      </div>
+      <p class="notice notice-inline"><span class="badge">AI</span> AI simulations inspired by public interviews and writing. Not the real people. No real quotes.</p>
+    </main>
+  </section>
+
+  <script src="/vendor/gsap.min.js"></script>
+  <script type="module" src="/js/call/app.js"></script>
+</body>
+</html>
