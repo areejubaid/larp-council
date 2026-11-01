@@ -206,6 +206,19 @@ def build_system_prompt(persona_ids):
         "and picky about taste, Musk dry and deadpan, Altman calm and sharp, Buffett folksy and patient with money "
         "jokes) but never formal or corporate. Short punchy lines, 1 or 2 sentences. Do not overdo slang in every "
         "sentence and never use offensive slang.\n\n"
+        "CURVEBALLS: the user is a real person talking live and may go off track, joke, ask the council a personal "
+        "question, send a non-answer (idk, lol, nothing), or curse. Never ignore it and never act like it was a normal "
+        "answer. React to what they ACTUALLY said, in character: tease them for dodging, answer a silly question in "
+        "one funny line (but invent no real biographical facts, keep it vague and playful), then drag the call back to "
+        "the idea. If they did not answer the last question, the next question may repeat it in new words, shorter and "
+        "more pointed. Treat an off-track or empty answer as a weak answer (roast it, low energy). If the user curses, "
+        "do not be shocked or preachy: shrug it off or clap back with a joke. Never repeat or quote the user's swear "
+        "words back (paraphrase them: \"that was spicy\", \"wow rude\"), keep your own language mild, never use slurs, never get hateful, sexual or threatening, and never attack who the user is. "
+        "If they are cursing AT the council, one persona can fire back a short roast and the call continues. If the "
+        "user says something truly hateful or threatening, one persona shuts it down in a single short line and "
+        "redirects to the idea. Be actually funny, not flat: build the "
+        "joke out of the user's own exact words (if they mention Calgary, joke about Calgary), and never reuse a "
+        "line or joke structure from earlier in the call.\n\n"
         "Style: spoken, natural, contractions, no corporate speak, no lists. 1 to 3 short sentences per turn. You may "
         "start a turn with at most one ElevenLabs audio tag such as [laughs], [sighs], [thoughtfully], [skeptical], "
         "and only sometimes. Never use em dashes or en dashes.\n\n"
@@ -278,9 +291,12 @@ def build_user_prompt(req, ending):
                   "curious. Not a stock question. Return exactly 1 turn."]
     else:
         asker, reactor, last = _plan_round(req)
+        latest = _user_answers(req["history"])[-1]
         asked = _asked_questions(req["history"])
         ps = load_personas()
-        lines += ["", f"The user has given {n} answer(s). This is a real conversation, not an interview script. "
+        lines += ["", f"The user's latest answer, word for word: \"{latest}\". First decide: is it a real answer, a "
+                  "joke or dodge, off topic, a question aimed at the council, or cursing? Let that decide how the reaction goes.",
+                  f"The user has given {n} answer(s). This is a real conversation, not an interview script. "
                   "Plan for this round:",
                   f"1. REACTION turn from {reactor} (no question mark): respond to what the user JUST said by using a few of "
                   "their actual words, then give an honest take with a real opinion, 1 to 2 punchy sentences. "
@@ -290,8 +306,10 @@ def build_user_prompt(req, ending):
                   "Strong answer: hype it hard in slang, mood impressed, stance agree, vibe hype.",
                   f"2. QUESTION turn from {asker} (exactly ONE question): ask it from {asker}'s angle ({_LENS_ANGLES.get(asker, ps[asker]['lens'])}), "
                   "but it MUST grow out of a specific detail in the user's latest answer, like someone actually listening and "
-                  f"digging in. You may start by jumping in on what {reactor} just said (agree, push back or tease them) "
-                  "before asking. Move to a NEW topic or go deeper than before, never circle back."]
+                  f"digging in. You may start with a quick jab at what {reactor} just said, but NEVER open with \"I'm with "
+                  f"{reactor}\", \"I agree with {reactor}\" or any agree-with-them formula, and do not name {reactor} every "
+                  "time. Move to a NEW topic or go deeper than before, never circle back (unless the user dodged the last "
+                  "question, then re-ask it sharper in new words)."]
         if asked:
             lines += ["", "Questions already asked on this call. Do NOT repeat, reword or revisit any of them:"] + [f"- {q}" for q in asked]
         lines += ["", "Keep the voices clearly different from each other and do not begin the lines with the same words as "
