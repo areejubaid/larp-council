@@ -42,6 +42,15 @@ cleanup() {
 }
 trap cleanup INT TERM
 
+# Stop any old copy still holding our ports (an earlier run, or a server started by hand).
+if command -v lsof >/dev/null; then
+  for port in 8001 8787 3000; do
+    old="$(lsof -ti tcp:$port -sTCP:LISTEN 2>/dev/null)"
+    if [ -n "$old" ]; then echo "Stopping old process on port $port"; kill $old 2>/dev/null; fi
+  done
+  sleep 1
+fi
+
 PY="$(command -v python3 || command -v python)"
 (cd part-b-brain && PORT=8001 "$PY" server.py >"$ROOT/.logs/brain.log" 2>&1) &
 PIDS+=($!)
