@@ -1,9 +1,7 @@
 """The three heavy steps as plain JSON-in, JSON-out functions.
 
-README asks for these to be Render Workflows tasks: score_idea, generate_debate,
-score_character. Render Workflows is in public beta, so check the installed SDK
-source for the exact decorator and trigger signatures, then wrap these functions
-with it. Nothing here depends on the SDK, so the wrapping is the only edit needed.
+workflow_app.py (repo folder root) registers these as Render Workflows tasks.
+Nothing in this file depends on the Render SDK, so it also runs in tests and the CLI.
 """
 from . import character, debate, scorer
 
