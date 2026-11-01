@@ -12,7 +12,7 @@ const FACES = {
 };
 
 export function createFace(mindId) {
-  const root = svg('svg', { viewBox: '0 0 100 100', role: 'img', 'aria-label': 'Neutral face' });
+  const root = svg('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true', focusable: 'false' });
   root.append(svg('circle', { class: 'head', cx: 50, cy: 52, r: 40 }));
   const eyeL = svg('ellipse', { class: 'eye', cx: 36, cy: 45 });
   const eyeR = svg('ellipse', { class: 'eye', cx: 64, cy: 45 });
@@ -39,7 +39,6 @@ export function createFace(mindId) {
     }
     mouth.setAttribute('d', f.mouth);
     mouth.setAttribute('class', f.open ? 'feat mouth-open' : 'feat');
-    root.setAttribute('aria-label', label ?? 'Face');
   }
   setMood('neutral', 'Neutral face');
   return { el: root, setMood };

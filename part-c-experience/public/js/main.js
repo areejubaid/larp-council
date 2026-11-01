@@ -324,6 +324,7 @@ function presenterHandlers(token) {
   return {
     onSilence: (on) => { cards.silence(on); els.silence.hidden = !on; if (on) motion.slowClap([], els.silence); },
     onLineStart: (line) => {
+      (token.lineMind ??= new Map()).set(line.lineId, line.mindId);
       const fed = token.feedSeq?.get(`line:${line.lineId}`);
       if (fed) { token.feedSeq.delete(`line:${line.lineId}`); dash.addFeed(fed[0], fed[1]); }
       if (line.mindId === token.player) return;
@@ -337,7 +338,7 @@ function presenterHandlers(token) {
     onBeat: (event, { audio } = {}) => {
       if (token.feedSeq?.has(event)) { dash.addFeed(token.feedSeq.get(event), event); token.feedSeq.delete(event); }
       const p = event.payload ?? {};
-      if (event.type === 'interruption') dash.logInterruption(p);
+      if (event.type === 'interruption') dash.logInterruption(p, token.lineMind?.get(p.interruptsLineId));
       else if (event.type === 'rage_quit') { cards.disconnect(p.mindId); dash.markLeft(p.mindId); }
       else if (event.type === 'character_scored') { token.charScore = p.characterScore; dash.setCharacter(p.characterScore); }
       else if (event.type === 'slow_clap') {

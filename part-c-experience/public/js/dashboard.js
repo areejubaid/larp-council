@@ -118,9 +118,9 @@ export function createDashboard(els) {
         h('div', { class: 'idea-row idea-avg' }, h('span', { text: `Average (${MOOD_LABEL[s.mood] ?? s.mood})` }), h('b', { text: String(s.average) })));
     },
     setCharacter,
-    logInterruption(p) {
-      prepend(els.interruptions, h('li', {},
-        `${mindName(p.mindId)} cut off ${p.interruptsLineId ? 'line ' + p.interruptsLineId : 'a line'}.`), LOG_MAX);
+    logInterruption(p, victimId) {
+      const victim = victimId && victimId !== p.mindId ? mindName(victimId) : 'someone';
+      prepend(els.interruptions, h('li', {}, `${mindName(p.mindId)} cut off ${victim} mid sentence.`), LOG_MAX);
     },
     /** Comedy-beat principleIds (rage_quit, slow_clap) are not sourced principles, so they never appear here. */
     addTrace(line) {
