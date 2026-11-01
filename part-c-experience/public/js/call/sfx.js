@@ -2,14 +2,25 @@
 // Kept quiet and short (under about a second) and played only after a persona finishes talking.
 
 let ctx = null;
-const MASTER = 0.22;
+let out = null;
+const MASTER = 0.5;
 
 function audio() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
-  if (!ctx) ctx = new AC();
+  if (!ctx) {
+    ctx = new AC();
+    out = ctx.createGain();
+    out.gain.value = 1;
+    out.connect(ctx.destination);
+  }
   if (ctx.state === 'suspended') ctx.resume().catch(() => {});
   return ctx;
+}
+
+/** For checks: the context state and the master output node. */
+export function sfxDebug() {
+  return { state: ctx?.state ?? 'none', out };
 }
 
 function tone(c, { type = 'sine', freq, to, start = 0, dur = 0.2, gain = 1, lowpass }) {
@@ -30,7 +41,7 @@ function tone(c, { type = 'sine', freq, to, start = 0, dur = 0.2, gain = 1, lowp
     osc.connect(f);
     node = f;
   }
-  node.connect(g).connect(c.destination);
+  node.connect(g).connect(out);
   osc.start(t0);
   osc.stop(t0 + dur + 0.05);
 }
@@ -51,7 +62,7 @@ function noise(c, { start = 0, dur = 0.3, gain = 1, from = 400, to = 3000, q = 1
   const g = c.createGain();
   g.gain.setValueAtTime(MASTER * gain, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  src.connect(f).connect(g).connect(c.destination);
+  src.connect(f).connect(g).connect(out);
   src.start(t0);
 }
 
@@ -95,8 +106,15 @@ export function playSfx(kind) {
     let i = Math.floor(Math.random() * pool.length);
     if (i === lastIdx[kind]) i = (i + 1) % pool.length;
     lastIdx[kind] = i;
+    if (c.state !== 'running') {
+      // Not unlocked yet: start as soon as the browser lets us.
+      let ms = 0;
+      c.resume().then(() => { ms = pool[i](c); }).catch(() => {});
+      return 700;
+    }
     return pool[i](c);
-  } catch {
+  } catch (err) {
+    console.warn('Aura sound failed:', err?.message ?? err);
     return 0;
   }
 }
@@ -105,3 +123,5 @@ export function playSfx(kind) {
 export function unlockSfx() {
   audio();
 }
+
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) => window.addEventListener(ev, () => audio(), { once: true, passive: true }));
