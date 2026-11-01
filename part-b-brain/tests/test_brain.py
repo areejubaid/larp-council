@@ -53,6 +53,14 @@ class Pipeline(unittest.TestCase):
         self.assertIsInstance(s["characterScore"], int)
         self.assertNotIn("perfectionist", {l["mindId"] for l in s["lines"]})
 
+    def test_every_bad_mood_has_an_interruption_in_every_mode(self):
+        pitches = ["Meh app that does stuff for people.", BAD]
+        for mind in (None, "perfectionist", "engineer", "operator"):
+            for text in pitches:
+                s = run(pitch(text, "larp", mind) if mind else pitch(text), use_llm=False)
+                if s["ideaScore"]["mood"] in ("appalled", "sarcastic"):
+                    self.assertTrue(any(l["interruptsLineId"] for l in s["lines"]), (mind, text, s["ideaScore"]["mood"]))
+
     def test_roast_mode_has_no_character_score(self):
         self.assertIsNone(run(pitch(BAD), use_llm=False)["characterScore"])
 
