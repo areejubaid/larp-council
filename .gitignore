@@ -1,2 +1,4 @@
 .logs/
 .env
+part_a_voice/cache/
+node_modules/

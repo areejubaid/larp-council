@@ -1,33 +1,34 @@
 # Run LARP Council locally
 
 ## Setup
-* Python 3.10 or newer and Node 22.
+* Python 3.10 or newer, Node 22 and Chrome (Edge also works). Chrome is needed for the voice mic.
 * `git pull` to get the latest version.
-* `export ELEVENLABS_API_KEY=your_key` for real voices.
-* Set one LLM key: `export ANTHROPIC_API_KEY=your_key` or `export FEATHERLESS_API_KEY=your_key`.
-* Optional: `export FEATHERLESS_MODEL=model_name` to pick the Featherless model.
-* With no LLM key the Brain uses its offline fallback. With no ElevenLabs key the voices are mock tones.
+* Keys are optional. `./start.sh` asks for them on the first run (hidden input) and saves them to `.env`, which is git-ignored.
+  * `ELEVENLABS_API_KEY` for real voices. Without it the voices are mock tones.
+  * `FEATHERLESS_API_KEY` or `ANTHROPIC_API_KEY` for idea-specific answers. Without one the Brain uses canned offline answers.
+* To enter the keys again, delete `.env` and run `./start.sh`.
 
 ## Start
 * From the repo root run `./start.sh`.
-* It starts the Brain (8001), Voice Studio (8787) and the Hub with the UI (3000).
-* Open http://localhost:3000
-* Type an idea or life decision, then press Join the call.
-* Answer each question by voice or text. End the call to get the summary.
+* It starts the Brain (8001), Voice Studio (8787) and the Hub with the UI (3000), and stops any old copies first.
+* Open http://localhost:3000 in Chrome.
+* Type an idea or life decision, then press **Join the call**.
+* Answer out loud (mic on, goes out after 5 quiet seconds) or type. Press **Wrap up** to end and get the final page.
 * Press Ctrl+C to stop everything.
 
-## Optional
-* `./start.sh --cache` caches the demo voice lines first, so the demo works offline.
+## Check it is healthy
+* `curl localhost:8001/health` should show `"provider": "featherless"` (or `anthropic`). `"offline"` means no LLM key.
 * `node tools/design-kit.mjs doctor` checks all three services.
 
 ## Tests
 * Brain: `cd part-b-brain && python3 -m unittest discover -s tests -t .`
-* Hub: `cd part-c-experience && npm test`
+* Hub and UI: `cd part-c-experience && npm test`
 
 ## Troubleshooting
-* Robotic browser voice: a voice line failed and the browser voice took over. Check `.logs/voice.log` for the error (key, credits, rate limit).
-* Generic answers that ignore your idea: no LLM key is set. Run `curl localhost:8001/health`, which reports the provider (anthropic, featherless or offline). Set a key and restart.
-* Voice log says mock mode: `ELEVENLABS_API_KEY` was not set in the terminal that ran `./start.sh`.
-* Microphone does not work: use Chrome or Edge and allow the mic, or type your answer.
-* Port already in use: stop the old process and run `./start.sh` again.
-* Other logs: `.logs/brain.log` and `.logs/hub.log`.
+* **Robotic voice:** a voice line failed and the browser voice took over. Check `.logs/voice.log` (key, credits, rate limit).
+* **Voice log says mock:** `ELEVENLABS_API_KEY` was not set when `./start.sh` ran. Delete `.env` and run it again.
+* **Generic or template answers:** no LLM key, or the provider rate limited the call. Check `.logs/brain.log` for "fallback".
+* **Mic does nothing:** use Chrome or Edge, allow the mic when asked, or turn the mic off and type.
+* **No aura sounds:** click anywhere on the page once so the browser unlocks audio, then hard refresh with Cmd+Shift+R.
+* **"The council is offline":** an old process is holding a port. Run `./start.sh` again, it stops old copies.
+* Logs: `.logs/brain.log`, `.logs/voice.log`, `.logs/hub.log`.

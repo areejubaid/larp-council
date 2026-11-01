@@ -1,6 +1,6 @@
-# LARP Council: pivot plan (3:50 PM)
+# LARP Council: turn contract and plan
 
-Submit by 5:45 PM. Feature freeze 5:00 PM.
+Built at LarpHacks 2026. This file keeps the turn contract that the three parts share.
 
 ## The product
 LARP Council is a Google Meet style call with AI personas of famous builders and thinkers (Steve Jobs, Elon Musk, Sam Altman, Warren Buffett). You pitch anything: a startup, a project, or a life decision. The council talks to you like a real meeting. One persona opens with a question specific to your idea ("Similar job boards already exist. What is different about yours?"). You answer by voice or text. Another persona follows up, agrees, or pushes back, each in their own way of thinking. After a few rounds you end the call and get a summary: each persona's take, a score, and next steps.
@@ -34,14 +34,14 @@ Response:
 ```json
 {
   "turns": [
-    {"speaker": "jobs", "text": "[leans in] Okay. The last hour part is interesting. But who is this for?", "mood": "curious", "stance": "question", "replyTo": "user"}
+    {"speaker": "jobs", "text": "[leans in] Okay. The last hour part is interesting. But who is this for?", "mood": "curious", "stance": "question", "replyTo": "user", "vibe": "none"}
   ],
   "awaitingUser": true,
   "done": false,
   "summary": null
 }
 ```
-* `turns`: 1 or 2 turns. Each `speaker` is a persona id. `text` may hold ElevenLabs audio tags like [sighs] or [laughs]. `mood` is one of curious, skeptical, impressed, annoyed, supportive. `stance` is one of question, agree, disagree, challenge, advice. `replyTo` is "user" or a persona id.
+* `turns`: 1 or 2 turns. Each `speaker` is a persona id. `text` may hold ElevenLabs audio tags like [sighs] or [laughs]. `mood` is one of curious, skeptical, impressed, annoyed, supportive. `stance` is one of question, agree, disagree, challenge, advice. `replyTo` is "user" or a persona id. `vibe` (optional) is `hype`, `roast` or `none`: the UI shows a +Aura or -Aura popup and plays a sound for `hype` and `roast`.
 * When `awaitingUser` is true, the last turn asks the user something.
 * `endCall: true` (or after about 5 user answers) returns `done: true` and a `summary`:
 ```json
