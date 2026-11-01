@@ -73,6 +73,8 @@ motion.enterSetup($('setup'));
 function setMsg(text, info = false) {
   els.msg.textContent = text;
   els.msg.classList.toggle('info', info);
+  els.msg.setAttribute('role', info || !text ? 'status' : 'alert');
+  els.pitch.setAttribute('aria-invalid', String(!info && /Type a pitch/.test(text)));
 }
 
 function micMessage(err) {
@@ -284,7 +286,15 @@ function onEnvelope(token, { seq, event }) {
   // The hub resends the full history on every reconnect; only handle each sequence number once.
   if (seq <= token.lastSeq) return;
   token.lastSeq = seq;
-  dash.addFeed(seq, event);
+  // Debate events reach the feed when the presenter actually plays them, so the feed never spoils the ending.
+  const paced = ['line_ready', 'interruption', 'rage_quit', 'slow_clap', 'character_scored', 'verdict_ready'];
+  if (paced.includes(event.type)) {
+    token.feedSeq ??= new Map();
+    token.feedSeq.set(event, seq);
+    if (event.type === 'line_ready' && event.payload?.lineId) token.feedSeq.set(`line:${event.payload.lineId}`, [seq, event]);
+  } else {
+    dash.addFeed(seq, event);
+  }
   const p = event.payload ?? {};
   switch (event.type) {
     case 'pitch_received': {
@@ -314,6 +324,8 @@ function presenterHandlers(token) {
   return {
     onSilence: (on) => { cards.silence(on); els.silence.hidden = !on; if (on) motion.slowClap([], els.silence); },
     onLineStart: (line) => {
+      const fed = token.feedSeq?.get(`line:${line.lineId}`);
+      if (fed) { token.feedSeq.delete(`line:${line.lineId}`); dash.addFeed(fed[0], fed[1]); }
       if (line.mindId === token.player) return;
       els.voiceStatus.hidden = true;
       cards.speakStart(line.mindId, line);
@@ -323,6 +335,7 @@ function presenterHandlers(token) {
     },
     onLineEnd: (line, opts) => cards.speakEnd(line.mindId, opts),
     onBeat: (event, { audio } = {}) => {
+      if (token.feedSeq?.has(event)) { dash.addFeed(token.feedSeq.get(event), event); token.feedSeq.delete(event); }
       const p = event.payload ?? {};
       if (event.type === 'interruption') dash.logInterruption(p);
       else if (event.type === 'rage_quit') { cards.disconnect(p.mindId); dash.markLeft(p.mindId); }
@@ -338,7 +351,10 @@ function presenterHandlers(token) {
         token.timers.add(t);
       }
     },
-    onVerdict: (event) => showVerdict(token, event.payload ?? {}),
+    onVerdict: (event) => {
+      if (token.feedSeq?.has(event)) { dash.addFeed(token.feedSeq.get(event), event); token.feedSeq.delete(event); }
+      showVerdict(token, event.payload ?? {});
+    },
     onFallback: (reason) => {
       els.voiceStatus.hidden = true;
       if (token.voiceActive) {
