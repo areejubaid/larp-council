@@ -64,7 +64,11 @@ async function fetchAudioUrl(line, baseUrl) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mindId: line.mindId, text: line.text }),
   });
-  if (!res.ok) throw new Error(`tts failed ${res.status}`);
+  if (!res.ok) {
+    let detail = "";
+    try { detail = (await res.json()).error || ""; } catch { /* no body */ }
+    throw new Error(`tts failed ${res.status} ${detail}`.trim());
+  }
   const data = await res.json();
   return `${baseUrl}${data.url}`;
 }
@@ -162,7 +166,8 @@ export async function playDebate(script, options = {}) {
         emit("line_ready", { lineId: line.lineId, mindId: line.mindId, cached: true });
         return { line, el };
       } catch (err) {
-        emit("line_ready", { lineId: line.lineId, mindId: line.mindId, fallback: "browser_voice" });
+        console.warn(`Voice failed for line ${line.lineId}, using the browser voice instead:`, err.message);
+        emit("line_ready", { lineId: line.lineId, mindId: line.mindId, fallback: "browser_voice", error: String(err.message) });
         return { line, el: null };
       }
     })

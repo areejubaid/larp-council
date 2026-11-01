@@ -61,6 +61,51 @@ function makeMockWav(text, hz) {
   return buf;
 }
 
+// ElevenLabs limits how many requests can run at once (2 on the free plan, more on paid plans).
+// The player asks for every line of a debate at the same time, so we queue here and retry on 429.
+const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT || 2);
+let running = 0;
+const waiting = [];
+function acquire() {
+  return new Promise((resolve) => {
+    if (running < MAX_CONCURRENT) {
+      running += 1;
+      resolve();
+    } else waiting.push(resolve);
+  });
+}
+function release() {
+  const next = waiting.shift();
+  if (next) next();
+  else running -= 1;
+}
+
+async function callElevenLabs(voiceId, text, model) {
+  await acquire();
+  try {
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      const res = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+        {
+          method: "POST",
+          headers: { "xi-api-key": API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ text, model_id: model }),
+        }
+      );
+      if (res.ok) return res;
+      const body = await res.text();
+      if (res.status === 429 && attempt < 4) {
+        console.warn(`ElevenLabs busy (429), retry ${attempt}`);
+        await new Promise((r) => setTimeout(r, 800 * attempt));
+        continue;
+      }
+      throw new Error(`ElevenLabs ${res.status}: ${body.slice(0, 300)}`);
+    }
+  } finally {
+    release();
+  }
+}
+
 async function synthesize(line) {
   const mind = voices.minds[line.mindId];
   if (!mind) throw new Error(`Unknown mindId: ${line.mindId}`);
@@ -79,15 +124,7 @@ async function synthesize(line) {
   if (!API_KEY) throw new Error("ELEVENLABS_API_KEY is not set");
   if (!mind.voiceId) throw new Error(`No voiceId for ${line.mindId}. Run design_voices.mjs first.`);
 
-  const res = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${mind.voiceId}?output_format=mp3_44100_128`,
-    {
-      method: "POST",
-      headers: { "xi-api-key": API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ text: line.text, model_id: model }),
-    }
-  );
-  if (!res.ok) throw new Error(`ElevenLabs ${res.status}: ${await res.text()}`);
+  const res = await callElevenLabs(mind.voiceId, line.text, model);
   fs.writeFileSync(full, Buffer.from(await res.arrayBuffer()));
   return { url: `/cache/${file}`, cached: false, mock: false };
 }
@@ -143,6 +180,7 @@ const server = http.createServer(async (req, res) => {
     }
     send(res, 404, JSON.stringify({ error: "not found" }));
   } catch (err) {
+    console.error("TTS error:", String(err.message || err));
     send(res, 500, JSON.stringify({ error: String(err.message || err) }));
   }
 });
