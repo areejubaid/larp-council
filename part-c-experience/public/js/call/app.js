@@ -124,7 +124,7 @@ function renderPicks() {
     label.append(input, card);
     list.appendChild(label);
   });
-  animate((g) => g.from('#persona-list .pick', { opacity: 0, y: 12, duration: 0.4, stagger: 0.06, ease: 'power2.out', clearProps: 'all' }));
+  animate((g) => g.from('#persona-list .pick', { opacity: 0, y: 12, duration: 0.4, stagger: 0.06, ease: 'power2.out', clearProps: 'transform,opacity' }));
 }
 function updateJoin() {
   const n = state.selected.size;
@@ -157,7 +157,7 @@ function buildTiles() {
   members.forEach((p, i) => grid.appendChild(makeTile(p, i, false)));
   grid.appendChild(makeTile({ id: 'user', name: 'You', role: 'Host', color: '#5b6b8c' }, members.length, true));
   buildPeople(members);
-  animate((g) => g.from('#grid .tile', { opacity: 0, y: 28, scale: 0.94, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'all' }));
+  animate((g) => g.from('#grid .tile', { opacity: 0, y: 28, scale: 0.94, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'transform,opacity' }));
 }
 function makeTile(p, i, isYou) {
   const t = el('div', 'tile' + (isYou ? ' is-you' : ''));
@@ -176,7 +176,6 @@ function makeTile(p, i, isYou) {
   mic.append(off, bars);
   const label = el('div', 'tile-label');
   label.append(el('span', 'name', p.name));
-  if (!isYou && p.role) label.append(el('span', 'tile-role', p.role));
   const think = el('div', 'tile-think');
   think.append(el('span', null, 'Thinking'), el('i'), el('i'), el('i'));
   think.setAttribute('aria-hidden', 'true');
@@ -241,7 +240,7 @@ function setCaption(speakerName, text, color) {
   $('cap-text').textContent = text;
   if (color) $('cap-speaker').style.setProperty('--c', color);
   body.classList.toggle('empty', !text);
-  animate((g) => g.fromTo(body, { opacity: 0.2, y: 6 }, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', clearProps: 'all' }));
+  animate((g) => g.fromTo(body, { opacity: 0.2, y: 6 }, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', clearProps: 'transform,opacity' }));
 }
 function setStatus(text) { $('captions-status').textContent = text; }
 function clearCaption() { $('cap-speaker').textContent = ''; $('cap-text').textContent = ''; $('captions').classList.add('empty'); }
@@ -295,7 +294,7 @@ function openPanel(tab) {
   $('pane-people').hidden = chat;
   $('chat-btn').setAttribute('aria-expanded', String(chat));
   $('people-btn').setAttribute('aria-expanded', String(!chat));
-  animate((g) => g.from('#panel', { x: 24, opacity: 0, duration: 0.3, ease: 'power2.out', clearProps: 'all' }));
+  animate((g) => g.from('#panel', { x: 24, opacity: 0, duration: 0.3, ease: 'power2.out', clearProps: 'transform,opacity' }));
 }
 function closePanel() {
   $('panel').hidden = true;
@@ -534,11 +533,11 @@ function showSummary(summary) {
   main.focus({ preventScroll: true });
   animate((g) => {
     const tl = g.timeline({ defaults: { ease: 'power3.out' } });
-    tl.from('#summary-title', { y: 20, opacity: 0, duration: 0.5, clearProps: 'all' })
-      .from('#summary-verdict', { y: 20, opacity: 0, duration: 0.5, clearProps: 'all' }, '-=0.3')
-      .from('#summary-takes .take', { y: 28, opacity: 0, duration: 0.5, stagger: 0.1, clearProps: 'all' }, '-=0.2')
-      .from('#summary-steps li', { x: -16, opacity: 0, duration: 0.4, stagger: 0.08, clearProps: 'all' }, '-=0.2')
-      .from('.summary-actions', { opacity: 0, duration: 0.4, clearProps: 'all' }, '-=0.1');
+    tl.from('#summary-title', { y: 20, opacity: 0, duration: 0.5, clearProps: 'transform,opacity' })
+      .from('#summary-verdict', { y: 20, opacity: 0, duration: 0.5, clearProps: 'transform,opacity' }, '-=0.3')
+      .from('#summary-takes .take', { y: 28, opacity: 0, duration: 0.5, stagger: 0.1, clearProps: 'transform,opacity' }, '-=0.2')
+      .from('#summary-steps li', { x: -16, opacity: 0, duration: 0.4, stagger: 0.08, clearProps: 'transform,opacity' }, '-=0.2')
+      .from('.summary-actions', { opacity: 0, duration: 0.4, clearProps: 'transform,opacity' }, '-=0.1');
   });
 }
 
@@ -667,7 +666,7 @@ function wire() {
 
 async function boot() {
   wire();
-  animate((g) => g.from('.landing-copy > *, .join-card', { y: 22, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out', clearProps: 'all' }));
+  animate((g) => g.from('.landing-copy > *, .join-card', { y: 22, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out', clearProps: 'transform,opacity' }));
   loadPersonas();
   try {
     const cfg = await (await fetch('/api/config')).json();
