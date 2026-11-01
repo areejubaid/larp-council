@@ -85,10 +85,10 @@ export function buildTurnScript(turn, sessionId, idx = 0) {
 
 /** Summary text for the clipboard. */
 export function summaryToText(idea, summary, nameOf = (id) => id) {
-  const lines = ['LARP Council summary', `Idea: ${idea}`, '', `Verdict: ${summary.verdict ?? ''}`, ''];
+  const lines = ['LARP Council receipts', `Idea: ${idea}`, '', `Verdict: ${summary.verdict ?? ''}`, ''];
   for (const p of summary.perPersona ?? []) lines.push(`${nameOf(p.speaker)} (${p.score}/10): ${p.take}`);
   if (summary.nextSteps?.length) {
-    lines.push('', 'Next steps:');
+    lines.push('', 'Side quests:');
     summary.nextSteps.forEach((s, i) => lines.push(`${i + 1}. ${s}`));
   }
   lines.push('', 'AI simulations inspired by public interviews and writing. Not the real people. No real quotes.');

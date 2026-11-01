@@ -613,6 +613,42 @@ async function startMic() {
 }
 function stopMic() { try { state.mic.rec?.stop(); } catch { /* already stopped */ } }
 
+/* ---------------- final page flavor ---------------- */
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const AURA_TIERS = [
+  { max: 2, color: '#ff4d5a', ranks: ['negative aura. the council left the chat', 'cooked. fully. no notes', 'certified larp. and not the good kind'],
+    subs: ['even the clock app got a better review', 'bro pitched this with his whole chest and it showed', 'this idea cant center a div'] },
+  { max: 4, color: '#ff8a65', ranks: ['npc energy', 'mid. aggressively mid', 'impressively fake'],
+    subs: ['there is a pulse in there somewhere, keep cooking', 'not cooked, just undercooked. big difference', 'the vibes are present, the proof is not'] },
+  { max: 6, color: '#ffd166', ranks: ['mid but salvageable', 'cooking, but the oven is off', 'side character with potential'],
+    subs: ['one real user away from being a real thing', 'the council is cautiously not laughing', 'fix the boring parts and we talk'] },
+  { max: 8, color: '#c8f169', ranks: ['real ones noticed', 'lowkey a W', 'main character loading'],
+    subs: ['the council nodded. some of them. out loud', 'actual aura detected, please remain calm', 'okay okay we see you'] },
+  { max: 10, color: '#7dffb2', ranks: ['unreasonable aura', 'goated. no further questions', 'the council is shook'],
+    subs: ['go ship it before you jinx it', 'bro is cooking and the kitchen is on fire', 'aura merch will be arranged'] },
+];
+const SCORE_WORDS = [
+  [2, 'cooked', '#ff4d5a'], [4, 'mid', '#ff8a65'], [6, 'not bad', '#ffd166'], [8, 'solid W', '#c8f169'], [10, 'goated', '#7dffb2'],
+];
+function scoreWord(score) {
+  const n = Number(score);
+  if (!Number.isFinite(n)) return null;
+  return SCORE_WORDS.find(([max]) => n <= max) ?? SCORE_WORDS.at(-1);
+}
+function paintAura(perPersona) {
+  const scores = (perPersona ?? []).map((p) => Number(p.score)).filter(Number.isFinite);
+  const card = $('aura-card');
+  if (!scores.length) { card.hidden = true; return; }
+  card.hidden = false;
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  const aura = Math.round((avg - 5) * 40);
+  const tier = AURA_TIERS.find((t) => avg <= t.max) ?? AURA_TIERS.at(-1);
+  card.style.setProperty('--aura', tier.color);
+  $('aura-num').textContent = (aura > 0 ? '+' : '') + aura;
+  $('aura-rank').textContent = pick(tier.ranks);
+  $('aura-sub').textContent = 'final aura. ' + pick(tier.subs);
+}
+
 /* ---------------- summary ---------------- */
 function showSummary(summary) {
   clearInterval(state.timerId);
@@ -620,7 +656,8 @@ function showSummary(summary) {
   const s = summary && typeof summary === 'object' ? summary : { verdict: 'The call has ended.', perPersona: [], nextSteps: [] };
   state.summary = s;
   $('summary-idea').textContent = 'Your idea: ' + truncate(state.idea, 140);
-  $('summary-verdict').textContent = s.verdict || 'The council has spoken.';
+  $('summary-verdict').textContent = s.verdict || 'the council has spoken. and left.';
+  paintAura(s.perPersona);
   const takes = $('summary-takes');
   takes.replaceChildren();
   (s.perPersona ?? []).forEach((pp, i) => {
@@ -630,17 +667,19 @@ function showSummary(summary) {
     const head = el('div', 'take-head');
     const av = el('span', 'mini-avatar', initials(p.name)); av.setAttribute('aria-hidden', 'true');
     const nm = el('div'); nm.append(el('div', 'take-name', p.name), el('div', 'take-role', p.role || ''));
+    const sw = scoreWord(pp.score);
+    if (sw) { const chip = el('span', 'score-word', sw[1]); chip.style.setProperty('--w', sw[2]); nm.append(chip); }
     const score = el('div', 'score'); score.style.color = safeColor(p.color, i); score.append(document.createTextNode(String(pp.score ?? '-')), el('small', null, '/10'));
     score.setAttribute('aria-label', `Score ${pp.score ?? 'none'} out of 10`);
     head.append(av, nm, score);
     li.append(head, el('p', 'take-text', pp.take || ''));
     takes.appendChild(li);
   });
-  if (!(s.perPersona ?? []).length) takes.appendChild(el('li', 'state', 'No individual takes came back for this call.'));
+  if (!(s.perPersona ?? []).length) takes.appendChild(el('li', 'state', 'the council said nothing. suspicious.'));
   const steps = $('summary-steps');
   steps.replaceChildren();
   (s.nextSteps ?? []).forEach((t) => steps.appendChild(el('li', null, t)));
-  if (!(s.nextSteps ?? []).length) steps.appendChild(el('li', null, 'No next steps this time. Start a new call to dig deeper.'));
+  if (!(s.nextSteps ?? []).length) steps.appendChild(el('li', null, 'no side quests this time. run it back to dig deeper.'));
   show('screen-summary');
   const main = $('main-summary');
   main.focus({ preventScroll: true });

@@ -343,3 +343,11 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 @keyframes auraflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .aura-pop, .aura-flash { animation: auralite 2.6s forwards !important; } @keyframes auralite { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
+
+/* Final page: aura card + score words */
+.aura-card { display: flex; align-items: center; gap: 20px; padding: 18px 24px; border-radius: var(--radius); background: var(--bg-2); border: 1px solid var(--line); border-left: 6px solid var(--aura, var(--signal)); }
+.aura-num { font-weight: 900; font-size: clamp(2.75rem, 10vw, 4.75rem); line-height: 1; letter-spacing: -.04em; color: var(--aura, var(--signal)); font-variant-numeric: tabular-nums; text-shadow: 0 0 40px color-mix(in srgb, var(--aura, var(--signal)) 45%, transparent); }
+.aura-rank { font-weight: 800; font-size: clamp(1.125rem, 3.2vw, 1.5rem); line-height: 1.15; letter-spacing: -.01em; }
+.aura-sub { color: var(--muted); margin-top: 4px; font-size: .9375rem; text-wrap: pretty; }
+.score-word { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; font-size: .8125rem; font-weight: 750; background: color-mix(in srgb, var(--w, var(--muted)) 20%, transparent); color: var(--w, var(--muted)); width: fit-content; }
+@media (max-width: 480px) { .aura-card { flex-direction: column; align-items: flex-start; gap: 8px; } }

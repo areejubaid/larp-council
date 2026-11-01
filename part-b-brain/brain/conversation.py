@@ -218,8 +218,14 @@ def build_system_prompt(persona_ids):
         'ending, return one short closing turn (stance "advice") and fill summary: {"verdict":"one sentence",'
         '"perPersona":[{"speaker":"<id>","take":"two sentences","score":<integer 1 to 10>}],"nextSteps":["...","...","..."]} '
         "with exactly one perPersona entry per persona listed above and exactly 3 short nextSteps. Write the verdict, "
-        "takes and nextSteps in the same casual, funny slang tone, roasting a weak idea and hyping a strong one, and "
-        "make the scores match: bad ideas get low scores (1 to 4), solid ones 5 to 7, great ones 8 to 10."
+        "takes and nextSteps in a dry, deadpan, self-aware hackathon humor, like a group chat roasting itself: "
+        "lowercase is fine, short punchy lines, jokes like impressively fake, cant center a div, aura, cooked, mid, "
+        "npc, main character (invent fresh ones, do not copy these). The verdict is one funny sentence. Each take is "
+        "two sentences in that persona's own voice, one real point and one joke. The three nextSteps are phrased like "
+        "side quests but must still be concrete, useful actions, written casually and a bit funny, for example "
+        "\"go talk to 5 actual humans before you touch the code\" and never stiff advice like \"conduct user research\". Roast a weak idea and hype a strong one, and "
+        "make the scores match: bad ideas get low scores (1 to 4), solid ones 5 to 7, great ones 8 to 10. Never "
+        "insult the user personally, only the idea."
     )
 
 
@@ -322,8 +328,10 @@ def _coerce(raw, req, ending):
         for p in s.get("perPersona") or []:
             if isinstance(p, dict):
                 score = p.get("score")
-                if isinstance(score, float):
-                    score = int(round(score))
+                try:  # models sometimes send "7", 7.5, 0 or 11: coerce and clamp instead of failing the whole summary
+                    score = max(1, min(10, int(round(float(score)))))
+                except (TypeError, ValueError):
+                    score = 5
                 per.append({"speaker": p.get("speaker"), "take": _DASHES.sub(", ", str(p.get("take", ""))), "score": score})
         have = {p["speaker"] for p in per}
         if any(pid not in have for pid in ids):
