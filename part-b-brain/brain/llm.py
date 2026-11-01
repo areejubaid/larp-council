@@ -166,14 +166,17 @@ def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TI
         raise LLMError("no LLM provider configured")
     call = _anthropic_text if prov == "anthropic" else _featherless_text
     last = None
-    for attempt in range(retries + 1):
+    rate_waits = 0
+    attempt = 0
+    while attempt <= retries:
         started = time.monotonic()
         try:
             text = call(system, user if attempt == 0 else user + "\n\nReturn ONLY one valid JSON object, nothing else.",
                         max_tokens, timeout)
         except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < retries:  # rate limited: wait a moment and try again
-                time.sleep(2)
+            if e.code == 429 and rate_waits < 4:  # rate limited: wait a moment and try again
+                rate_waits += 1
+                time.sleep(3)
                 continue
             raise LLMError(f"{prov} call failed: {e!r}") from e
         except Exception as e:  # network, HTTP, SDK missing, bad payload shape
@@ -182,6 +185,7 @@ def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TI
             return extract_json(text)
         except ValueError as e:  # includes json.JSONDecodeError
             last = e
+        attempt += 1
         if time.monotonic() - started > timeout:
             break
     raise LLMError(f"{prov} returned invalid JSON: {last}")
