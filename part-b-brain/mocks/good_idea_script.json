@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "sessionId": "good1",
+  "mode": "roast",
+  "ideaScore": {
+    "originality": 4,
+    "feasibility": 5,
+    "effort": 5,
+    "average": 4.7,
+    "mood": "slow_clap"
+  },
+  "lines": [
+    {
+      "lineId": "l1",
+      "mindId": "engineer",
+      "text": "[stunned silence] [exhales] I came here to find the flaw. I cannot find the flaw.",
+      "mood": "slow_clap",
+      "interruptsLineId": null,
+      "principleId": "first_principles_constraint",
+      "sourceNote": "Public interviews describing first-principles reasoning (team: add exact link and verify before demo)."
+    },
+    {
+      "lineId": "l2",
+      "mindId": "operator",
+      "text": "[quiet] [pause] The compounding is obvious. Nobody say anything.",
+      "mood": "slow_clap",
+      "interruptsLineId": null,
+      "principleId": "compounding_growth",
+      "sourceNote": "Public essays on compounding (team: add exact link and verify before demo)."
+    },
+    {
+      "lineId": "l3",
+      "mindId": "perfectionist",
+      "text": "[slow clap] [grudgingly] ... Fine.",
+      "mood": "slow_clap",
+      "interruptsLineId": null,
+      "principleId": "slow_clap",
+      "sourceNote": "Comedy beat, not a sourced principle."
+    }
+  ],
+  "characterScore": null,
+  "verdict": {
+    "embarrassmentScore": 7,
+    "summary": "The council could not find a flaw, and one of them said fine.",
+    "roast": "There is nothing to roast. The council checked three times. Please enjoy this brief moment, because it will not last."
+  }
+}
