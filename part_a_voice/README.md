@@ -10,6 +10,7 @@ Owner: Aayan. Track: ElevenLabs. Minds are AI parodies, not the real people.
 ## Files
 * `voices.json`: the four minds with Voice Design descriptors and their voiceId (filled in by the script below).
 * `design_voices.mjs`: creates the voices with ElevenLabs Voice Design and saves the ids.
+* `link_voices.mjs`: links voices you saved on the ElevenLabs website to `voices.json` by name (spends no credits).
 * `server.mjs`: TTS server with disk cache and a MOCK mode (fake tones, no key needed).
 * `player.js`: browser module with `playDebate(script, options)` and `transcribePitch()`.
 * `prerender.mjs`: warms the cache for all mock scripts.
@@ -40,7 +41,8 @@ Events emitted (contract Event shape): line_ready, audio_started, interruption, 
 ## Done checklist
 * [x] Renderer, cache and offline fallback (server cache, then browser voice)
 * [x] Interruptions, rage quit and slow clap tested in mock mode
-* [ ] Voices designed with a real API key
+* [x] Council Perfectionist designed and saved on the ElevenLabs website (run link_voices.mjs to record its id)
+* [ ] Engineer and Operator voices designed
 * [ ] Each mind distinguishable by ear
 * [ ] Sarcasm audible on at least 3 lines (tune audio tags)
 * [ ] Cache warmed for demo lines
