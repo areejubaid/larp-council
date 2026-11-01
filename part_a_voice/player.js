@@ -34,6 +34,15 @@ function makeEvent(script, type, payload) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Part B marks the two big comedy beats with principleId ("rage_quit" or "slow_clap").
+// A mood of the same name also works, so either convention triggers the effect.
+function beatOf(line) {
+  for (const b of ["rage_quit", "slow_clap"]) {
+    if (line.principleId === b || line.mood === b) return b;
+  }
+  return null;
+}
+
 async function fetchAudioUrl(line, baseUrl) {
   const res = await fetch(`${baseUrl}/api/tts`, {
     method: "POST",
@@ -182,10 +191,10 @@ export async function playDebate(script, options = {}) {
       current = null;
     }
 
-    if (line.mood === "rage_quit") {
+    if (beatOf(line) === "rage_quit") {
       emit("rage_quit", { lineId: line.lineId, mindId: line.mindId });
       await doorSlam();
-    } else if (line.mood === "slow_clap") {
+    } else if (beatOf(line) === "slow_clap") {
       emit("slow_clap", { lineId: line.lineId, mindId: line.mindId });
       await slowClap();
     }

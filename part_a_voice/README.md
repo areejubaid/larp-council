@@ -32,8 +32,9 @@ Events emitted (contract Event shape): line_ready, audio_started, interruption, 
 
 ## Contract notes for Part B
 * An interruption is a DebateLine whose `interruptsLineId` is the previous line.
-* A line with `mood` set to `rage_quit` triggers the door slam and rage_quit event after it plays.
-* A line with `mood` set to `slow_clap` triggers the slow clap and slow_clap event after it plays.
+* A line whose `principleId` is `rage_quit` triggers the door slam and rage_quit event after it plays (a `mood` of the same name also works).
+* A line whose `principleId` is `slow_clap` triggers the slow clap and slow_clap event after it plays.
+* Moods follow Part B's contract: slow_clap, impressed, skeptical, sarcastic, appalled.
 * Audio tags such as [sighs], [pause], [laughs] and [interrupting] go inside `text`.
 
 ## Done checklist

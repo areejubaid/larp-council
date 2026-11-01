@@ -7,7 +7,7 @@
     "feasibility": 3,
     "effort": 1,
     "average": 1.7,
-    "mood": "rage_quit"
+    "mood": "appalled"
   },
   "lines": [
     {
@@ -50,10 +50,10 @@
       "lineId": "l5",
       "mindId": "engineer",
       "text": "[laughs awkwardly] Okay. I am out. [pause] Someone call me when physics gets involved.",
-      "mood": "rage_quit",
+      "mood": "appalled",
       "interruptsLineId": "l4",
-      "principleId": "first_principles_constraint",
-      "sourceNote": "Public talks on first principles reasoning"
+      "principleId": "rage_quit",
+      "sourceNote": "Comedy beat, not a sourced principle."
     }
   ],
   "characterScore": null,
