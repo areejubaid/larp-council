@@ -132,10 +132,12 @@ def _enforce(lines, parts, mood):
         if "rage_quit" not in pids:
             lines += _build_lines([(parts[-1], "[quietly] I am going to step out. I wish you luck.", "rage_quit", False)], parts, mood)
             lines[-1]["lineId"] = f"l{len(lines)}"
-        if not any(l["interruptsLineId"] for l in lines) and len(lines) > 1:
-            lines[1]["interruptsLineId"] = lines[0]["lineId"]
-            if "[interrupting]" not in lines[1]["text"]:
-                lines[1]["text"] = "[interrupting] " + lines[1]["text"]
+    if mood in ("appalled", "sarcastic") and not any(l["interruptsLineId"] for l in lines) and len(lines) > 1:
+        # Bad ideas always get at least one interruption, even when the interrupting
+        # mind is the player's persona in LARP mode and its lines were dropped.
+        lines[1]["interruptsLineId"] = lines[0]["lineId"]
+        if "[interrupting]" not in lines[1]["text"]:
+            lines[1]["text"] = "[interrupting] " + lines[1]["text"]
     if mood == "slow_clap" and "slow_clap" not in pids:
         lines += _build_lines([(parts[-1], "[slow clap] [grudgingly] ... Fine.", "slow_clap", False)], parts, mood)
         lines[-1]["lineId"] = f"l{len(lines)}"
