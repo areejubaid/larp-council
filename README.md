@@ -98,10 +98,10 @@ Input: pitch text (and in LARP Mode, the chosen mind).
 Parts and data flow:
 * Player browser (mic, UI) sends a pitch to the Event Hub.
 * Event Hub (Part C) forwards the pitch to the Brain.
-* Brain (Part B, Render Workflows tasks) scores the idea, sets moods, writes the debate script, and scores character consistency. It sends events back to the Event Hub.
+* Brain (Part B, plain Python or TypeScript service, Render Workflows optional) scores the idea, sets moods, writes the debate script, and scores character consistency. It sends events back to the Event Hub.
 * Voice Studio (Part A) turns each debate line into audio with ElevenLabs and plays it with interruptions.
 * Event Hub streams every event over WebSocket to the live dashboard.
-* Stretch: Agentboxd inbox, where each mind emails the player an action plan after the debate.
+* Cut: Agentboxd email. We enter one sponsor track only (ElevenLabs).
 
 Everything is connected only through the shared contract in section 8. No part imports code from another part.
 
@@ -180,7 +180,7 @@ Mock data rule: every part ships its own mock files in a `mocks` folder (one bad
 Each part has one owner, a mock input, a standalone test, and a done checklist. No part waits for another. Integration happens once, at the integration window in section 10.
 
 ### Part A: Voice Studio (ElevenLabs)
-Owner: ________
+Owner: Aayan. Code lives in the `part_a_voice` folder, see its README.
 
 Goal: turn any DebateScript into a convincing, funny spoken debate, and turn the player's speech into text.
 
@@ -203,8 +203,8 @@ Done when
 
 Judging criteria served: Demo, Creativity, ElevenLabs track.
 
-### Part B: Brain (idea scoring, minds, debate, Render Workflows)
-Owner: ________
+### Part B: Brain (idea scoring, minds, debate)
+Owner: Areej
 
 Goal: take a PitchInput and return a DebateScript plus a stream of events.
 
@@ -215,8 +215,7 @@ Tasks
 * Build the debate generator: writes lines with audio tags, interruption markers, rivalries, and principle ids.
 * Build the character scorer for LARP Mode.
 * Build the verdict and roast writer.
-* Wrap the heavy steps as Render Workflows tasks: score_idea, generate_debate, score_character. Render Workflows are in public beta, tasks are defined as Python or TypeScript functions and triggered through the Render SDK. Check the installed SDK source before trusting signatures, and deploy a hello task in the first hour.
-* Stretch: Agentboxd sender that emails the player each mind's action plan from its own inbox.
+* Expose the steps as plain functions: score_idea, generate_debate, score_character. Render Workflows is optional now (we are not entering the Render track), so only use it if it is quick.
 * Optional: use Featherless AI inference (every participant has one month of access) as the language model backend to save credits.
 
 Standalone test: a command line script that takes a pitch from a text file and prints a valid DebateScript, checked against the contract.
@@ -227,10 +226,10 @@ Done when
 * A great idea produces a slow clap.
 * Total response time is short enough for a 2 minute demo.
 
-Judging criteria served: Working Product, Usefulness, Theme Alignment, Render track, Agentboxd track (stretch).
+Judging criteria served: Working Product, Usefulness, Theme Alignment.
 
 ### Part C: Experience (frontend, event hub, dashboard, deployment, demo)
-Owner: ________
+Owner: Shayan
 
 Goal: make the product easy to use and make the system design visible on screen.
 
@@ -251,7 +250,7 @@ Done when
 * The dashboard updates live from the event stream.
 * The Render URL loads on a phone.
 
-Judging criteria served: Ease of Use, Demo, Working Product, Render track.
+Judging criteria served: Ease of Use, Demo, Working Product.
 
 ## 10. Timeline (Toronto time, adjust to the actual clock)
 
@@ -289,8 +288,9 @@ Scale per criterion is 1 (weak), 3 (good), 5 (excellent). Aim for 5 on each by s
 
 Sponsor tracks (scored out of 5 each, separate from the main total)
 * ElevenLabs: show the voice feature working live and explain why audio makes the experience better.
-* Render: show the live deployment and Render Workflows tasks, and explain Render's role.
-* Agentboxd (only if real): show the working inbox with an email from a mind. Cut it if it is not real by 4:30 PM.
+* Chosen track: ElevenLabs only (one sponsor track allowed).
+* Render: hosting only, not entered as a track.
+* Agentboxd: cut.
 * Sportiner: not targeted.
 
 ### What similar winning projects did, and what we copy
@@ -303,7 +303,7 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 
 ### Risks and mitigations
 * Voice latency or API failure: cached audio for key lines, and a recorded backup video.
-* Render Workflows is in public beta and its SDK can change: deploy a hello task early, and check the installed SDK source.
+* Render Workflows is in public beta and no longer required, so a hosting problem cannot sink the Brain.
 * Policy risk on voices: designed voices only, parody labels on screen, no real names in voice prompts.
 * Venue network: test on phone hotspot, use cached assets.
 * Scope creep: one core loop first, stretch goals only after integration works.
@@ -312,9 +312,9 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 ## 12. Setup checklist
 
 * ElevenLabs free access for participants: join the ElevenLabs Discord, open the coupon codes channel, click Start Redemption, choose the event, use the email used for registration, and the bot sends the code.
-* Agentboxd (stretch): sign up, then Settings, Redeem a code, enter the code LARPHACKS-2026 (Builder plan free for a month), create an API key.
+* Agentboxd: skipped, not needed.
 * Featherless AI: one month of inference access for participants, setup guide is in the hackathon participant materials.
-* Render: create an account, make a Workflow service, and deploy a hello task.
+* Render: create an account to host the web app and Event Hub (event credit code is in the participant group chat).
 * Repo with folders: part_a_voice, part_b_brain, part_c_experience, contracts, mocks.
 
 ## 13. Demo script (2 minutes)
@@ -330,13 +330,14 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 * Project name and team members.
 * Short description (use the one line pitch plus the two modes).
 * Working demo link and access instructions.
-* Chosen prize tracks (ElevenLabs, Render, and Agentboxd only if real).
+* Chosen prize track: ElevenLabs only.
 * Backup demo video.
 * Confirm the submission link and required uploads at the help desk, since they were still to be confirmed.
 
 ## 15. Changelog
 
 * November 1, 2026: first full README created. Contract version 1 drafted. Three independent parts defined. Voice policy and Render Workflows notes added from research.
+* November 1, 2026: one sponsor track only, so ElevenLabs is the track. Agentboxd cut, Render Workflows optional. Owners set: Part A Aayan, Part B Areej, Part C Shayan. Part A code added in `part_a_voice` (rage_quit and slow_clap moods, interruption via interruptsLineId).
 
 ## 16. Sources
 
