@@ -83,17 +83,6 @@ function loadAudio(url) {
   });
 }
 
-// Last resort if the server and cache are both unreachable: the browser's own voice.
-function speakFallback(line) {
-  return new Promise((resolve) => {
-    if (!("speechSynthesis" in window)) return resolve();
-    const u = new SpeechSynthesisUtterance(line.text.replace(/\[[^\]]*\]/g, ""));
-    u.onend = resolve;
-    u.onerror = resolve;
-    speechSynthesis.speak(u);
-  });
-}
-
 function fadeOut(el, ms) {
   const start = el.volume;
   const steps = 12;
@@ -160,16 +149,22 @@ export async function playDebate(script, options = {}) {
   // 1) Prefetch every line in parallel so playback never stalls mid debate.
   const loaded = await Promise.all(
     script.lines.map(async (line) => {
-      try {
-        const url = await fetchAudioUrl(line, opts.baseUrl);
-        const el = await loadAudio(url);
-        emit("line_ready", { lineId: line.lineId, mindId: line.mindId, cached: true });
-        return { line, el };
-      } catch (err) {
-        console.warn(`Voice failed for line ${line.lineId}, using the browser voice instead:`, err.message);
-        emit("line_ready", { lineId: line.lineId, mindId: line.mindId, fallback: "browser_voice", error: String(err.message) });
-        return { line, el: null };
+      let lastErr;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const url = await fetchAudioUrl(line, opts.baseUrl);
+          const el = await loadAudio(url);
+          emit("line_ready", { lineId: line.lineId, mindId: line.mindId, cached: true });
+          return { line, el };
+        } catch (err) {
+          lastErr = err;
+          if (attempt < 3) await sleep(500 * attempt);
+        }
       }
+      // Never fall back to the browser's own (robotic, often female) voice. The caption still shows, silently.
+      console.warn(`Voice failed for line ${line.lineId}, showing the caption only:`, lastErr?.message);
+      emit("line_ready", { lineId: line.lineId, mindId: line.mindId, fallback: "silent", error: String(lastErr?.message) });
+      return { line, el: null };
     })
   );
 
@@ -195,7 +190,8 @@ export async function playDebate(script, options = {}) {
     const nextInterrupts = next && next.line.interruptsLineId === line.lineId;
 
     if (!el) {
-      await speakFallback(line);
+      // No audio for this line: stay silent and give the caption time to be read.
+      await sleep(Math.max(1500, line.text.replace(/\[[^\]]*\]/g, "").length * 55));
       current = null;
     } else {
       el.volume = 1;

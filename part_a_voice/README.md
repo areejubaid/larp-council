@@ -39,7 +39,7 @@ Events emitted (contract Event shape): line_ready, audio_started, interruption, 
 * Audio tags such as [sighs], [pause], [laughs] and [interrupting] go inside `text`.
 
 ## Done checklist
-* [x] Renderer, cache and offline fallback (server cache, then browser voice)
+* [x] Renderer, cache and offline fallback (server cache, then a silent caption, never the browser voice)
 * [x] Interruptions, rage quit and slow clap tested in mock mode
 * [x] Council Perfectionist designed and saved on the ElevenLabs website (run link_voices.mjs to record its id)
 * [x] Council Engineer and Council Operator designed and saved on the ElevenLabs website

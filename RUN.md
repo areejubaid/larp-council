@@ -25,7 +25,7 @@
 * Hub and UI: `cd part-c-experience && npm test`
 
 ## Troubleshooting
-* **Robotic voice:** a voice line failed and the browser voice took over. Check `.logs/voice.log` (key, credits, rate limit).
+* **A line has no voice:** if ElevenLabs fails for a line (key, credits, rate limit), the app retries 3 times, then shows the caption silently. It never falls back to the browser's own voice. Check `.logs/voice.log` for the error.
 * **Voice log says mock:** `ELEVENLABS_API_KEY` was not set when `./start.sh` ran. Delete `.env` and run it again.
 * **Generic or template answers:** no LLM key, or the provider rate limited the call. Check `.logs/brain.log` for "fallback".
 * **Mic does nothing:** use Chrome or Edge, allow the mic when asked, or turn the mic off and type.

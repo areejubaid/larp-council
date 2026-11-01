@@ -14,6 +14,14 @@ export class VoiceUnavailableError extends Error {
   }
 }
 
+// Safety net: the browser's built in voice (robotic, often female) must never speak in this app.
+try {
+  if (globalThis.speechSynthesis) {
+    globalThis.speechSynthesis.speak = () => {};
+    globalThis.speechSynthesis.cancel?.();
+  }
+} catch { /* ignore */ }
+
 const stubAdapter = {
   available: false,
   async playDebate() {
