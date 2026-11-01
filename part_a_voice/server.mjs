@@ -84,14 +84,25 @@ async function callElevenLabs(voiceId, text, model) {
   await acquire();
   try {
     for (let attempt = 1; attempt <= 4; attempt++) {
-      const res = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-        {
-          method: "POST",
-          headers: { "xi-api-key": API_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ text, model_id: model }),
+      let res;
+      try {
+        res = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+          {
+            method: "POST",
+            headers: { "xi-api-key": API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({ text, model_id: model }),
+            signal: AbortSignal.timeout(12000), // never let one stuck request freeze the call
+          }
+        );
+      } catch (err) {
+        if (attempt < 4) {
+          console.warn(`ElevenLabs network error (${err.name}), retry ${attempt}`);
+          await new Promise((r) => setTimeout(r, 400 * attempt));
+          continue;
         }
-      );
+        throw err;
+      }
       if (res.ok) return res;
       const body = await res.text();
       if (res.status === 429 && attempt < 4) {
