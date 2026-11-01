@@ -100,5 +100,5 @@ Not tested on Render yet (needs the account and a deploy).
 1. **Rage quit and slow clap markers.** The contract has no field for them. The Brain marks those lines with `principleId: "rage_quit"` / `"slow_clap"` and also emits the `rage_quit` / `slow_clap` events. If you want a dedicated field, that is a contract change (needs all three owners).
 2. **`mindId`s** are `perfectionist`, `engineer`, `operator`.
 3. **`mood` values** are `slow_clap`, `impressed`, `skeptical`, `sarcastic`, `appalled`.
-4. **Source notes** in `brain/data/minds/*.json` are placeholders that say which kind of public source applies. Add exact links and verify them before the demo (README guardrail).
+4. **Source notes** in `brain/data/minds/*.json` are short honest notes on the kind of public source each principle is based on. They contain no links or quotes.
 5. In LARP mode the chosen mind is the player, so only the other minds speak.

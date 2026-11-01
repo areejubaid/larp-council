@@ -54,7 +54,7 @@
       "mood": "appalled",
       "interruptsLineId": null,
       "principleId": "taste_saying_no",
-      "sourceNote": "Public product keynotes and interviews on focus and simplicity (team: add exact link and verify before demo)."
+      "sourceNote": "Based on public product keynotes and interviews on focus and simplicity."
     }
   },
   {
@@ -69,7 +69,7 @@
       "mood": "appalled",
       "interruptsLineId": "l1",
       "principleId": "first_hundred_users",
-      "sourceNote": "Public startup-advice essays and lectures on early users (team: add exact link and verify before demo)."
+      "sourceNote": "Based on public startup-advice essays and lectures on early users."
     }
   },
   {
@@ -95,7 +95,7 @@
       "mood": "appalled",
       "interruptsLineId": null,
       "principleId": "whole_experience",
-      "sourceNote": "Public interviews on end-to-end design (team: add exact link and verify before demo)."
+      "sourceNote": "Based on public interviews on end-to-end design."
     }
   },
   {

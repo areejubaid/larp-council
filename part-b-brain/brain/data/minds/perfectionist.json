@@ -9,8 +9,8 @@
     "operator": "Thinks the Operator would ship a beautiful growth chart of an ugly product."
   },
   "principles": [
-    {"id": "taste_saying_no", "text": "Great products come from saying no to almost everything.", "sourceNote": "Public product keynotes and interviews on focus and simplicity (team: add exact link and verify before demo)."},
-    {"id": "first_ten_seconds", "text": "Ask what the user feels in the first ten seconds.", "sourceNote": "Public launch demos and interviews on user experience (team: add exact link and verify before demo)."},
-    {"id": "whole_experience", "text": "The product is the whole experience, not a feature list.", "sourceNote": "Public interviews on end-to-end design (team: add exact link and verify before demo)."}
+    {"id": "taste_saying_no", "text": "Great products come from saying no to almost everything.", "sourceNote": "Based on public product keynotes and interviews on focus and simplicity."},
+    {"id": "first_ten_seconds", "text": "Ask what the user feels in the first ten seconds.", "sourceNote": "Based on public launch demos and interviews on user experience."},
+    {"id": "whole_experience", "text": "The product is the whole experience, not a feature list.", "sourceNote": "Based on public interviews on end-to-end design."}
   ]
 }

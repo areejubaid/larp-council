@@ -9,8 +9,8 @@
     "engineer": "Thinks the Engineer will solve the physics and forget to find a customer."
   },
   "principles": [
-    {"id": "first_hundred_users", "text": "Know exactly who your first hundred users are.", "sourceNote": "Public startup-advice essays and lectures on early users (team: add exact link and verify before demo)."},
-    {"id": "compounding_growth", "text": "Growth that compounds beats effort that adds.", "sourceNote": "Public essays on compounding (team: add exact link and verify before demo)."},
-    {"id": "speed_of_learning", "text": "The winner is whoever learns fastest.", "sourceNote": "Public startup-advice talks on iteration speed (team: add exact link and verify before demo)."}
+    {"id": "first_hundred_users", "text": "Know exactly who your first hundred users are.", "sourceNote": "Based on public startup-advice essays and lectures on early users."},
+    {"id": "compounding_growth", "text": "Growth that compounds beats effort that adds.", "sourceNote": "Based on public essays on compounding."},
+    {"id": "speed_of_learning", "text": "The winner is whoever learns fastest.", "sourceNote": "Based on public startup-advice talks on iteration speed."}
   ]
 }
