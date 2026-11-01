@@ -76,12 +76,11 @@ def _anthropic_call(system: str, user: str, max_tokens: int, timeout: float) -> 
     body = json.dumps({
         "model": os.environ.get("BRAIN_MODEL", DEFAULT_ANTHROPIC_MODEL),
         "max_tokens": max_tokens,
-        "temperature": 0.8,
         "system": system,
         "messages": [{"role": "user", "content": user}],
     }).encode()
     req = urllib.request.Request(
-        os.environ.get("ANTHROPIC_BASE_URL", ANTHROPIC_URL), data=body, method="POST",
+        ANTHROPIC_URL, data=body, method="POST",
         headers={
             "Content-Type": "application/json",
             "x-api-key": os.environ["ANTHROPIC_API_KEY"],
