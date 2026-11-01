@@ -32,9 +32,34 @@ Unit tests: `python -m unittest discover -s tests -t .`
 | Character scorer | `brain/character.py` | LARP mode only. |
 | Verdict | `brain/verdict.py` | Embarrassment Score. |
 | Events | `brain/events.py` | Set `EVENT_HUB_URL` to POST events to Part C. |
-| Render tasks | `brain/tasks.py` | JSON in, JSON out. Wrap with the Render Workflows SDK. |
+| Render tasks | `brain/tasks.py`, `workflow_app.py` | JSON in, JSON out. `workflow_app.py` registers `score_idea`, `generate_debate`, `score_character` and `run_pitch` (whole loop) as Render Workflows tasks. |
 
 Every Claude call falls back to the offline script on error, so the demo never depends on the network.
+
+## Deploy on Render Workflows
+
+Written against `render` 1.6.0 on PyPI (`render_sdk` is only a shim that installs it). Render Workflows is in beta, so the API may change.
+
+In the Render dashboard, create a **Workflow** service from this repo:
+
+- Root directory: `part-b-brain`
+- Build command: `pip install -r requirements.txt`
+- Start command: `render-workflows workflow_app:app`
+- Environment variables: `ANTHROPIC_API_KEY`, optional `EVENT_HUB_URL` (Part C's hub)
+
+Local dev server (needs the Render CLI): `render ea tasks dev -- render-workflows workflow_app:app`
+
+Trigger from Python (Parts A and C, or a quick test):
+
+```python
+from render import Render
+render = Render()  # needs RENDER_API_KEY
+script = render.workflows.run_task("<workflow-slug>/run_pitch", [
+    {"sessionId": "s1", "mode": "roast", "pitchText": "An app that ..."}
+])
+```
+
+Not tested on Render yet (needs the account and a deploy).
 
 ## Mocks for Parts A and C
 
