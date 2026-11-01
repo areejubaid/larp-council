@@ -12,6 +12,16 @@ ROOT="$(pwd)"
 #   ELEVENLABS_API_KEY=...
 #   FEATHERLESS_API_KEY=...
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
+# First run: ask for the keys (hidden input) and save them to .env so you never type them again.
+if [ -z "${ELEVENLABS_API_KEY:-}" ] && [ -t 0 ]; then
+  printf "Paste your ElevenLabs API key (hidden, Enter to skip): "; read -rs K; echo
+  if [ -n "$K" ]; then echo "ELEVENLABS_API_KEY=$K" >> .env; export ELEVENLABS_API_KEY="$K"; fi
+fi
+if [ -z "${FEATHERLESS_API_KEY:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -t 0 ]; then
+  printf "Paste your Featherless API key (hidden, Enter to skip): "; read -rs K; echo
+  if [ -n "$K" ]; then echo "FEATHERLESS_API_KEY=$K" >> .env; export FEATHERLESS_API_KEY="$K"; fi
+fi
+[ -f .env ] && chmod 600 .env
 mkdir -p "$ROOT/.logs"
 
 if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
