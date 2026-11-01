@@ -1,0 +1,147 @@
+[
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "pitch_received",
+    "payload": {
+      "mode": "larp",
+      "chosenMindId": "engineer"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "idea_scored",
+    "payload": {
+      "originality": 1,
+      "feasibility": 3,
+      "effort": 1,
+      "average": 1.7,
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "mood_changed",
+    "payload": {
+      "mindId": "operator",
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "mood_changed",
+    "payload": {
+      "mindId": "perfectionist",
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l1",
+      "mindId": "perfectionist",
+      "text": "[long pause] [deadpan] I have seen cluttered ideas. This is not an idea. This is a junk drawer.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "taste_saying_no",
+      "sourceNote": "Public product keynotes and interviews on focus and simplicity (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l2",
+      "mindId": "operator",
+      "text": "[interrupting] [softly] I want to be fair. Who are the first hundred users? [pause] Right. Nobody.",
+      "mood": "appalled",
+      "interruptsLineId": "l1",
+      "principleId": "first_hundred_users",
+      "sourceNote": "Public startup-advice essays and lectures on early users (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "interruption",
+    "payload": {
+      "lineId": "l2",
+      "mindId": "operator",
+      "interruptsLineId": "l1"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l3",
+      "mindId": "perfectionist",
+      "text": "[sharply] And whose fault is this? You two keep shouting ship it, and look what ships.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "whole_experience",
+      "sourceNote": "Public interviews on end-to-end design (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l4",
+      "mindId": "operator",
+      "text": "[quietly] I am going to step out. I wish you luck. I mean that as the harshest thing I can say.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "rage_quit",
+      "sourceNote": "Comedy beat, not a sourced principle."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "rage_quit",
+    "payload": {
+      "lineId": "l4",
+      "mindId": "operator"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "character_scored",
+    "payload": {
+      "mindId": "engineer",
+      "characterScore": 20
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "verdict_ready",
+    "payload": {
+      "embarrassmentScore": 82,
+      "summary": "The council rejected this idea so hard that one member left the call.",
+      "roast": "The council did not just disagree with this pitch. One of them left the call. It was cluttered, unconstrained, and had no users, which is a rare triple. Reading the room is a skill, and this pitch read none of it."
+    }
+  }
+]

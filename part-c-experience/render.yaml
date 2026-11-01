@@ -1,0 +1,18 @@
+# Render Blueprint for Part C. The repo holds three parts, so this file lives in part-c-experience/
+# and Render must be told where it is (Blueprint settings, "Blueprint File Path"). See README.md.
+services:
+  - type: web
+    name: mind-council-experience
+    runtime: node
+    rootDir: part-c-experience
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: REPLAY_SPEED
+        value: "1"
+      # Optional. Full URL the hub POSTs a PitchInput to. Leave unset to use demo replay.
+      - key: BRAIN_URL
+        sync: false
