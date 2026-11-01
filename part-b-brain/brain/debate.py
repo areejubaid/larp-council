@@ -163,6 +163,6 @@ def generate_debate(pitch, idea_score, mode, chosen=None, use_llm=True):
             lines = _enforce(_build_lines(tuples, parts, mood), parts, mood)
             if lines and raw.get("summary") and raw.get("roast"):
                 return {"lines": lines, "summary": str(raw["summary"]), "roast": str(raw["roast"])}
-        except Exception:
-            pass  # fall through to the offline script
+        except Exception as e:
+            llm.note_failure(e)  # fall through to the offline script
     return generate_offline(mood, parts)

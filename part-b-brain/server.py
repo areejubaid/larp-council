@@ -35,7 +35,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
-            self._send(200, {"ok": True, "llm": llm.available()})
+            self._send(200, {"ok": True, "llm": llm.available(), "provider": llm.provider() or "offline"})
         else:
             self._send(404, {"error": "not found; try GET /health or POST /run"})
 
@@ -66,5 +66,5 @@ def make_server(port: int) -> ThreadingHTTPServer:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    print(f"Brain listening on :{port} (llm={'on' if llm.available() else 'offline'})", flush=True)
+    print(f"Brain listening on :{port} (model provider: {llm.provider() or 'offline'})", flush=True)
     make_server(port).serve_forever()
