@@ -100,7 +100,7 @@
         <span class="claps" aria-hidden="true"><i></i><i></i><i></i></span>
       </div>
 
-      <div id="cards" class="cards"></div>
+      <div id="cards" class="cards" role="group" aria-label="The three council minds"></div>
 
       <div class="dash">
         <section class="panel" aria-labelledby="h-meters">
@@ -141,9 +141,9 @@
   </main>
 
   <div id="verdict" class="overlay" role="dialog" aria-modal="true" aria-labelledby="verdict-title" hidden>
-    <div class="verdict-card">
+    <div class="verdict-card" aria-live="polite">
       <h2 id="verdict-title" tabindex="-1">The verdict is in</h2>
-      <p class="score-label">Embarrassment Score</p>
+      <p class="score-label">Embarrassment score</p>
       <p class="big-score"><span id="v-score">0</span><span class="of">/100</span></p>
       <p id="v-char" class="v-char" hidden></p>
       <p id="v-summary" class="v-summary"></p>

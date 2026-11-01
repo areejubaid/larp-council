@@ -44,11 +44,11 @@ export function jolt(card) {
   safe(() => {
     const G = g();
     G.killTweensOf(card);
-    G.timeline({ onComplete: () => G.set(card, { clearProps: 'transform,boxShadow' }) })
+    G.timeline({ onComplete: () => G.set(card, { clearProps: 'transform,borderColor' }) })
       .to(card, { x: -12, duration: 0.05 }).to(card, { x: 11, duration: 0.06 })
       .to(card, { x: -8, duration: 0.06 }).to(card, { x: 6, duration: 0.06 })
       .to(card, { x: 0, duration: 0.1 });
-    G.fromTo(card, { boxShadow: '0 0 0 2px #ff3d2e, 0 0 30px 2px rgba(255,61,46,.55)' }, { boxShadow: '0 0 0 0 rgba(255,61,46,0)', duration: 0.7, ease: 'power2.out' });
+    G.fromTo(card, { borderColor: '#ff3d2e' }, { borderColor: 'rgba(255,61,46,0)', duration: 0.7, ease: 'power2.out', clearProps: 'borderColor' });
   });
 }
 
