@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind Council Voice Studio</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #111; color: #eee; max-width: 760px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; }
+  .note { color: #aaa; font-size: 13px; }
+  button { background: #3b82f6; color: #fff; border: 0; padding: 10px 14px; margin: 4px 4px 4px 0; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  button.alt { background: #444; }
+  textarea { width: 100%; box-sizing: border-box; height: 70px; background: #1c1c1c; color: #eee; border: 1px solid #333; border-radius: 6px; padding: 8px; }
+  #log { background: #1c1c1c; border: 1px solid #333; border-radius: 6px; padding: 8px; height: 280px; overflow: auto; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+  .tag { color: #fbbf24; }
+</style>
+</head>
+<body>
+  <h1>Mind Council Voice Studio (Part A test page)</h1>
+  <p class="note">All minds are AI parodies. Standalone test for Part A: plays a mock DebateScript with interruptions, a rage quit and a slow clap.</p>
+  <div>
+    <button id="bad">Play bad idea debate</button>
+    <button id="good">Play good idea debate</button>
+    <button id="stop" class="alt">Stop</button>
+  </div>
+  <p class="note" id="mode">Checking server...</p>
+  <h3>Pitch by voice</h3>
+  <button id="mic" class="alt">Record pitch</button>
+  <textarea id="pitch" placeholder="Your transcribed pitch appears here"></textarea>
+  <h3>Event log</h3>
+  <div id="log"></div>
+
+<script type="module">
+  import { playDebate, transcribePitch } from "./player.js";
+
+  const log = document.getElementById("log");
+  const add = (e) => {
+    log.textContent += `${e.type}  ${JSON.stringify(e.payload).slice(0, 140)}\n`;
+    log.scrollTop = log.scrollHeight;
+  };
+  let controller = null;
+
+  fetch("/api/voices").then((r) => r.json()).then((v) => {
+    document.getElementById("mode").textContent = v.mock
+      ? "MOCK mode: tones instead of real voices. Set ELEVENLABS_API_KEY for the real thing."
+      : "LIVE mode: ElevenLabs voices.";
+  }).catch(() => { document.getElementById("mode").textContent = "Server not reachable."; });
+
+  async function run(name) {
+    if (controller) controller.abort();
+    controller = new AbortController();
+    log.textContent = "";
+    const script = await (await fetch(`/mocks/${name}.json`)).json();
+    await playDebate(script, { onEvent: add, signal: controller.signal });
+    add({ type: "done", payload: {} });
+  }
+
+  document.getElementById("bad").onclick = () => run("bad_idea_script");
+  document.getElementById("good").onclick = () => run("good_idea_script");
+  document.getElementById("stop").onclick = () => controller && controller.abort();
+  document.getElementById("mic").onclick = async () => {
+    try {
+      const text = await transcribePitch({ onInterim: (t) => (document.getElementById("pitch").value = t) });
+      document.getElementById("pitch").value = text;
+    } catch (err) {
+      add({ type: "mic_error", payload: { message: err.message } });
+    }
+  };
+</script>
+</body>
+</html>

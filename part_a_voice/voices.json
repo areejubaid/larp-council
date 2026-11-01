@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "model": "eleven_v3",
+  "note": "Voices are made with ElevenLabs Voice Design from descriptors only. No real names, no cloning. Run design_voices.mjs to fill in voiceId for each mind.",
+  "minds": {
+    "perfectionist": {
+      "label": "The Perfectionist (AI parody)",
+      "voiceId": "",
+      "voiceName": "Council Perfectionist",
+      "description": "Adult male, calm and measured, deliberate pacing with long pauses, quietly intense, precise, mildly condescending when unimpressed. Clear studio quality recording.",
+      "mockPitchHz": 180
+    },
+    "engineer": {
+      "label": "The First Principles Engineer (AI parody)",
+      "voiceId": "",
+      "voiceName": "Council Engineer",
+      "description": "Adult male, halting thoughtful cadence with stop and start phrasing, dry deadpan delivery, occasional awkward laugh, speeds up when excited. Clear studio quality recording.",
+      "mockPitchHz": 140
+    },
+    "operator": {
+      "label": "The Scale Operator (AI parody)",
+      "voiceId": "",
+      "voiceName": "Council Operator",
+      "description": "Young adult male, soft spoken, even and thoughtful, careful complete sentences, gentle tone with a quiet cutting edge. Clear studio quality recording.",
+      "mockPitchHz": 220
+    },
+    "agent_builder": {
+      "label": "The Agent Builder (AI parody)",
+      "voiceId": "",
+      "voiceName": "Council Agent Builder",
+      "description": "Adult male, quick and practical, upbeat, slightly sarcastic about slow plans, energetic pacing. Clear studio quality recording.",
+      "mockPitchHz": 260
+    }
+  }
+}

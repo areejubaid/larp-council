@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "sessionId": "mock-bad",
+  "mode": "roast",
+  "ideaScore": {
+    "originality": 1,
+    "feasibility": 3,
+    "effort": 1,
+    "average": 1.7,
+    "mood": "rage_quit"
+  },
+  "lines": [
+    {
+      "lineId": "l1",
+      "mindId": "perfectionist",
+      "text": "[sighs] A social app for sharing photos of your lunch. [pause] Really.",
+      "mood": "sarcastic",
+      "interruptsLineId": null,
+      "principleId": "taste_over_features",
+      "sourceNote": "Public interviews on focus and taste"
+    },
+    {
+      "lineId": "l2",
+      "mindId": "engineer",
+      "text": "[interrupting] Wait, wait. After all this time, this is what you came up with? What is the limiting factor here, the lunch?",
+      "mood": "sarcastic",
+      "interruptsLineId": "l1",
+      "principleId": "first_principles_constraint",
+      "sourceNote": "Public talks on first principles reasoning"
+    },
+    {
+      "lineId": "l3",
+      "mindId": "operator",
+      "text": "[softly] Who are the first one hundred users? [pause] Your roommates?",
+      "mood": "skeptical",
+      "interruptsLineId": null,
+      "principleId": "first_users",
+      "sourceNote": "Public essays on startup growth"
+    },
+    {
+      "lineId": "l4",
+      "mindId": "perfectionist",
+      "text": "[annoyed] What have you done to the world? There are forty seven buttons in this demo.",
+      "mood": "sarcastic",
+      "interruptsLineId": null,
+      "principleId": "taste_over_features",
+      "sourceNote": "Public interviews on focus and taste"
+    },
+    {
+      "lineId": "l5",
+      "mindId": "engineer",
+      "text": "[laughs awkwardly] Okay. I am out. [pause] Someone call me when physics gets involved.",
+      "mood": "rage_quit",
+      "interruptsLineId": "l4",
+      "principleId": "first_principles_constraint",
+      "sourceNote": "Public talks on first principles reasoning"
+    }
+  ],
+  "characterScore": null,
+  "verdict": {
+    "embarrassmentScore": 91,
+    "summary": "The council has seen better ideas in a lunch queue.",
+    "roast": "This idea is not a product, it is a screenshot of a sandwich. Go home, and think about what you have done."
+  }
+}

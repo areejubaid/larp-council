@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "sessionId": "mock-good",
+  "mode": "larp",
+  "ideaScore": {
+    "originality": 5,
+    "feasibility": 4,
+    "effort": 5,
+    "average": 4.7,
+    "mood": "slow_clap"
+  },
+  "lines": [
+    {
+      "lineId": "g1",
+      "mindId": "operator",
+      "text": "[thoughtfully] Okay. [pause] I did not expect that to be this good.",
+      "mood": "impressed",
+      "interruptsLineId": null,
+      "principleId": "first_users",
+      "sourceNote": "Public essays on startup growth"
+    },
+    {
+      "lineId": "g2",
+      "mindId": "engineer",
+      "text": "[excited] The constraint is clear, the cost curve works, and it ships this week. [laughs]",
+      "mood": "impressed",
+      "interruptsLineId": null,
+      "principleId": "first_principles_constraint",
+      "sourceNote": "Public talks on first principles reasoning"
+    },
+    {
+      "lineId": "g3",
+      "mindId": "perfectionist",
+      "text": "[long pause] Fine. [pause] It is simple. That is the highest compliment I have.",
+      "mood": "slow_clap",
+      "interruptsLineId": null,
+      "principleId": "taste_over_features",
+      "sourceNote": "Public interviews on focus and taste"
+    }
+  ],
+  "characterScore": 84,
+  "verdict": {
+    "embarrassmentScore": 6,
+    "summary": "A rare unanimous, if grudging, approval.",
+    "roast": "We could not find anything to roast. We are all deeply annoyed about that."
+  }
+}
