@@ -134,7 +134,7 @@ curl -X POST localhost:8000/turn -H "Content-Type: application/json" -d "{\"sess
 The first available provider wins, and any error or invalid output falls back to the offline engine, so a call never breaks.
 
 - `ANTHROPIC_API_KEY`: use Anthropic. `BRAIN_MODEL` picks the model (default `claude-sonnet-5-5`). Needs `pip install anthropic`.
-- `FEATHERLESS_API_KEY`: use Featherless through its OpenAI compatible API. `FEATHERLESS_MODEL` picks the model (default `meta-llama/Meta-Llama-3.1-70B-Instruct`). Uses only the standard library.
+- `FEATHERLESS_API_KEY`: use Featherless through its OpenAI compatible API. `FEATHERLESS_MODEL` picks the model (default `Qwen/Qwen2.5-72B-Instruct`). Uses only the standard library.
 - Neither key: offline engine. It classifies the idea as a startup or a life decision, pulls key words from the idea and the latest answer, and fills persona specific templates with a seeded random from `sessionId` plus the turn count, so a session is repeatable and different ideas get different conversations.
 - `BRAIN_OFFLINE=1` forces offline even when a key is set.
 

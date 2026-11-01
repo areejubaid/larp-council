@@ -33,7 +33,7 @@ def _load_env():
 _load_env()
 
 FEATHERLESS_URL = "https://api.featherless.ai/v1"
-DEFAULT_FEATHERLESS_MODEL = "meta-llama/Meta-Llama-3.1-70B-Instruct"
+DEFAULT_FEATHERLESS_MODEL = "Qwen/Qwen2.5-72B-Instruct"  # the Llama models are gated on Featherless (403)
 
 
 def provider():
