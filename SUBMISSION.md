@@ -1,7 +1,7 @@
-# Mind Council: hackathon submission
+# LARP Council: hackathon submission
 
 ## Project name
-* Mind Council
+* LARP Council
 
 ## Team
 * Aayan Areejo
@@ -12,7 +12,7 @@
 * Pitch your idea as a famous founder, and a council of sarcastic AI minds judges your idea and how well you can LARP as one of them.
 
 ## Short description
-* Mind Council has two modes on one engine.
+* LARP Council has two modes on one engine.
 * Roast mode: you pitch as yourself. An idea scorer rates originality, feasibility and effort. The score sets each mind's mood. Weak ideas make the minds interrupt each other, blame each other, and sometimes rage quit. Great ideas get a slow clap.
 * LARP mode: you pick a mind, such as the Perfectionist, and pitch in that mind's style by voice or text. The other minds react out loud and roast you if you break character. You get a Character Consistency Score and an Embarrassment Score.
 * The minds are AI parodies inspired by public figures. They are not the real people. Their voices are designed from text descriptions with ElevenLabs Voice Design. They are not cloned from anyone.

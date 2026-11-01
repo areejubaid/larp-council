@@ -1,47 +1,62 @@
-# Mind Council: finish plan (LarpHacks 2026)
+# LARP Council: pivot plan (3:50 PM)
 
-Working branch: `ready` (main plus Shayan's `part-c-experience`). Hard submit cutoff 6:00 PM, aim for 5:45 PM. Judging 6:30 PM, 2 minute demo plus 2 minutes of questions. One sponsor track: ElevenLabs.
+Submit by 5:45 PM. Feature freeze 5:00 PM.
 
-## Where we are (3:00 PM)
+## The product
+LARP Council is a Google Meet style call with AI personas of famous builders and thinkers (Steve Jobs, Elon Musk, Sam Altman, Warren Buffett). You pitch anything: a startup, a project, or a life decision. The council talks to you like a real meeting. One persona opens with a question specific to your idea ("Similar job boards already exist. What is different about yours?"). You answer by voice or text. Another persona follows up, agrees, or pushes back, each in their own way of thinking. After a few rounds you end the call and get a summary: each persona's take, a score, and next steps.
 
-| Part | Owner | Status |
-| --- | --- | --- |
-| A Voice Studio | Aayan | Done. 3 ElevenLabs voices designed and linked, request queue for the free plan limit, sentence aware interruptions. |
-| B Brain | Areej | Done on main. Offline scripts plus optional Claude, HTTP server for Render. |
-| C Experience | Shayan | Done on branch `part-c-experience` (64 tests pass). Not merged to main yet. |
-| Together | All | Brain to Hub to Voice tested locally in mock mode, works. |
+Every persona is an AI simulation built from their public interviews, talks and writing. The UI says so at all times, and nothing is presented as a real quote. Voices are designed or library voices, never clones.
 
-## Design sources
+## Architecture (3 parts, joined by the turn contract below)
+* Brain (part-b-brain, Python): new `POST /turn` and `GET /personas`. Persona profiles from public material. LLM: Anthropic if `ANTHROPIC_API_KEY`, else Featherless (OpenAI compatible) if `FEATHERLESS_API_KEY`, else an offline fallback that still uses words from the idea.
+* Hub and UI (part-c-experience, Node): Meet style call screen, proxies `/api/turn` and `/api/personas` to the Brain, same origin.
+* Voice Studio (part_a_voice): personas mapped to voices in `voices.json`. The UI plays each turn with `playDebate({lines:[turn]})` and listens with `transcribePitch()`.
 
-| Source | Status | How |
-| --- | --- | --- |
-| GSAP (gsap.com) | Used | npm `gsap`, vendored to `part-c-experience/public/vendor` by `tools/design-kit.mjs vendor` (CSP allows only 'self'). |
-| Taste Skill (tasteskill.dev) | Used | `design/taste-skill.md` (MIT). Design rules the UI follows. |
-| 21st.dev | Not used | MCP needs an API key, free tier is 2 installs a day, host not reachable from the build sandbox. |
-| ThreeUI (threeui.com) | Not used | MCP is Pro only. |
-| CreatorFlow (creatorflow.so) | Not relevant | Instagram DM automation, not a design tool. |
+## Turn contract (version 2)
+`POST /turn` (Brain) and `POST /api/turn` (hub, forwards to the Brain base URL + `/turn`)
 
-`tools/design-kit.mjs` is the small CLI that stands in for the missing MCPs: `vendor`, `taste`, `doctor`, `sources`.
+Request:
+```json
+{
+  "sessionId": "s1",
+  "idea": "Google Maps for jobs: see open jobs near you on a map",
+  "personas": ["jobs", "musk", "altman", "buffett"],
+  "history": [
+    {"speaker": "musk", "text": "Similar things exist. What is different about yours?"},
+    {"speaker": "user", "text": "Ours shows walk-in jobs posted in the last hour."}
+  ],
+  "endCall": false
+}
+```
+`history` is empty on the first call. The newest user answer is the last history item.
 
-## Work now (3:00 to 4:30 PM)
+Response:
+```json
+{
+  "turns": [
+    {"speaker": "jobs", "text": "[leans in] Okay. The last hour part is interesting. But who is this for?", "mood": "curious", "stance": "question", "replyTo": "user"}
+  ],
+  "awaitingUser": true,
+  "done": false,
+  "summary": null
+}
+```
+* `turns`: 1 or 2 turns. Each `speaker` is a persona id. `text` may hold ElevenLabs audio tags like [sighs] or [laughs]. `mood` is one of curious, skeptical, impressed, annoyed, supportive. `stance` is one of question, agree, disagree, challenge, advice. `replyTo` is "user" or a persona id.
+* When `awaitingUser` is true, the last turn asks the user something.
+* `endCall: true` (or after about 5 user answers) returns `done: true` and a `summary`:
+```json
+{"verdict": "One sentence overall.", "perPersona": [{"speaker": "jobs", "take": "Two sentences.", "score": 7}], "nextSteps": ["Short action", "Short action", "Short action"]}
+```
 
-1. Design pass on Part C UI (agent): a council room look, GSAP motion for the moments judges remember (minds joining the call, speaking pulse, interruption jolt, rage quit disconnect, slow clap, verdict reveal). Taste Skill rules. No new runtime dependencies besides vendored GSAP. Keep all 64 tests passing. Respect reduced motion.
-2. Demo readiness (agent): remove placeholder source notes ("team: add exact link") from what the UI shows, write `SUBMISSION.md`, a one page `RUN.md` for all three services, check the Render configs.
-3. Integration check (lead): run all three services, click every demo path in a headless browser on desktop and phone width, fix anything broken.
+`GET /personas` returns `[{"id": "jobs", "name": "Steve Jobs", "role": "Apple co-founder", "lens": "Taste, focus, saying no", "color": "#hex"}]`.
 
-Feature freeze 4:30 PM. After that, fixes only.
+## Work split
+* Agent 1 (Sonnet): Brain conversation engine, persona research and profiles, LLM providers, offline fallback, tests.
+* Agent 2 (Sonnet): Meet style UI, rename to LARP Council, hub proxy routes, conversation loop with voice and text, end of call summary. Design: GSAP, Taste Skill, polish checklist, modern Meet look.
+* Lead (Opus): voices mapping, rename in docs, integration test, recording, submission.
 
-## Before the demo (4:30 to 5:45 PM)
+## Voices
+* jobs uses the Council Perfectionist voice, musk uses Council Engineer, altman uses Council Operator, buffett uses an ElevenLabs library voice.
 
-* Aayan: `git pull`, run the Voice Studio with the key, then `node prerender.mjs` so demo lines are cached (works offline, no credits during the demo).
-* Deploy, if time allows: Brain and Hub on Render free web services (`part-b-brain`, `part-c-experience/render.yaml`). The Voice Studio can run on a laptop during judging, since the key must stay private.
-* Rehearse the 2 minute script in README section 13 twice, record a backup video.
-* Submit by 5:45 PM with `SUBMISSION.md`.
-
-## Demo script (2 minutes)
-
-* 0:00 Theme line: "Pitch your idea as a famous founder style. A council of sarcastic AI minds judges it." Show the AI parody label.
-* 0:15 Bad idea: interruptions, blame game, "Okay. I am out." rage quit with the door slam.
-* 0:50 Good idea: grudging slow clap, principle trace on screen.
-* 1:20 LARP round: pitch as the Perfectionist, Character Consistency Score.
-* 1:45 Live event feed and ElevenLabs voices, close with the one line pitch.
+## What the team needs
+* An LLM key on the demo laptop for real, idea specific answers: `ANTHROPIC_API_KEY` or `FEATHERLESS_API_KEY` (participant credits). Without one the offline fallback runs.

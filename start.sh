@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts all of Mind Council on one machine and opens it in the browser.
+# Starts all of LARP Council on one machine and opens it in the browser.
 #
 #   ./start.sh            real ElevenLabs voices if ELEVENLABS_API_KEY is set, otherwise mock tones
 #   ./start.sh --cache    also caches every demo line first (spends credits once, then the demo is free and offline)
@@ -22,7 +22,7 @@ fi
 PIDS=()
 cleanup() {
   echo
-  echo "Stopping Mind Council..."
+  echo "Stopping LARP Council..."
   for pid in "${PIDS[@]}"; do kill "$pid" 2>/dev/null; done
   exit 0
 }
@@ -53,7 +53,7 @@ if [ "${1:-}" = "--cache" ]; then
 fi
 
 echo
-echo "Mind Council is running: http://localhost:3000"
+echo "LARP Council is running: http://localhost:3000"
 [ "$(uname)" = "Darwin" ] && open "http://localhost:3000"
 echo "Press Ctrl+C to stop. Logs: .logs/brain.log, .logs/voice.log, .logs/hub.log"
 wait

@@ -1,4 +1,4 @@
-# Mind Council
+# LARP Council
 
 LarpHacks 2026 project. Last updated: November 1, 2026. Owner of this file: the team lead. Update the Changelog at the bottom whenever something changes.
 
@@ -10,7 +10,7 @@ Pitch your idea as a famous founder. A council of sarcastic AI minds judges your
 
 The main track theme: "Create a product to help you LARP as someone you are not."
 
-Mind Council gives you a way to LARP as the way a famous founder thinks and talks. You borrow their principles, their pace, and their verbal habits, and the other minds tell you out loud whether you pulled it off.
+LARP Council gives you a way to LARP as the way a famous founder thinks and talks. You borrow their principles, their pace, and their verbal habits, and the other minds tell you out loud whether you pulled it off.
 
 ## 3. What the product does
 
@@ -352,6 +352,8 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 * November 1, 2026 (status check): Part A voices saved and linked, queue plus retry added for the ElevenLabs free plan limit. Part B Brain merged to main (offline mode plus optional Claude, HTTP server). Part C Experience pushed on branch `part-c-experience`, not merged to main yet. Brain to Hub to Voice flow tested together in mock mode and works.
 
 * November 1, 2026 (3 PM): finish plan in `plan.md`. Branch `ready` combines main with Part C. Design sources: GSAP and Taste Skill used (see `tools/design-kit.mjs` and `design/`); 21st.dev and ThreeUI MCPs need paid keys, CreatorFlow is not a design tool. Design pass and demo readiness in progress.
+
+* November 1, 2026 (3:50 PM): pivot to LARP Council. A Google Meet style call where AI personas of Steve Jobs, Elon Musk, Sam Altman and Warren Buffett hold a real back and forth about any idea or life decision. New turn contract version 2 in `plan.md` (`POST /turn`, `GET /personas`). Persona ids map to the existing designed voices plus one library voice.
 
 ## 16. Sources
 

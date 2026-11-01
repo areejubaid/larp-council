@@ -1,4 +1,4 @@
-# Run Mind Council locally
+# Run LARP Council locally
 
 Three services, three terminals. Start from the repo root.
 
