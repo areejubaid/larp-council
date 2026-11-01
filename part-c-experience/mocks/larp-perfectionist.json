@@ -1,0 +1,147 @@
+[
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "pitch_received",
+    "payload": {
+      "mode": "larp",
+      "chosenMindId": "perfectionist"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "idea_scored",
+    "payload": {
+      "originality": 1,
+      "feasibility": 3,
+      "effort": 1,
+      "average": 1.7,
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "mood_changed",
+    "payload": {
+      "mindId": "engineer",
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "mood_changed",
+    "payload": {
+      "mindId": "operator",
+      "mood": "appalled"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l1",
+      "mindId": "engineer",
+      "text": "[interrupting] [dry laugh] The hard constraint here is the entire concept. Physics would like its afternoon back.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "first_principles_constraint",
+      "sourceNote": "Public interviews describing first-principles reasoning (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l2",
+      "mindId": "operator",
+      "text": "[softly] I want to be fair. Who are the first hundred users? [pause] Right. Nobody.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "first_hundred_users",
+      "sourceNote": "Public startup-advice essays and lectures on early users (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l3",
+      "mindId": "engineer",
+      "text": "[overlapping] My fault? You would cut every feature, including the point.",
+      "mood": "appalled",
+      "interruptsLineId": "l2",
+      "principleId": "cost_per_unit",
+      "sourceNote": "Public talks on cost breakdowns and manufacturing (team: add exact link and verify before demo)."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "interruption",
+    "payload": {
+      "lineId": "l3",
+      "mindId": "engineer",
+      "interruptsLineId": "l2"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "line_ready",
+    "payload": {
+      "lineId": "l4",
+      "mindId": "operator",
+      "text": "[quietly] I am going to step out. I wish you luck. I mean that as the harshest thing I can say.",
+      "mood": "appalled",
+      "interruptsLineId": null,
+      "principleId": "rage_quit",
+      "sourceNote": "Comedy beat, not a sourced principle."
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "rage_quit",
+    "payload": {
+      "lineId": "l4",
+      "mindId": "operator"
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "character_scored",
+    "payload": {
+      "mindId": "perfectionist",
+      "characterScore": 20
+    }
+  },
+  {
+    "version": 1,
+    "sessionId": "s1",
+    "ts": 1793559138,
+    "type": "verdict_ready",
+    "payload": {
+      "embarrassmentScore": 82,
+      "summary": "The council rejected this idea so hard that one member left the call.",
+      "roast": "The council did not just disagree with this pitch. One of them left the call. It was cluttered, unconstrained, and had no users, which is a rare triple. Reading the room is a skill, and this pitch read none of it."
+    }
+  }
+]
