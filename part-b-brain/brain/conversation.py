@@ -282,7 +282,7 @@ def next_turns(request, use_llm=None):
     req = validate_turn_request(request, known_ids())
     ending = req["endCall"] or len(_user_answers(req["history"])) >= MAX_ANSWERS
     if use_llm is None:
-        use_llm = llm.provider() != "offline"
+        use_llm = llm.provider() is not None
     resp = None
     if use_llm:
         try:

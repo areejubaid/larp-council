@@ -38,7 +38,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
-            self._send(200, {"ok": True, "llm": llm.provider() != "offline", "provider": llm.provider()})
+            self._send(200, {"ok": True, "llm": llm.available(), "provider": llm.provider() or "offline"})
         elif self.path == "/personas":
             self._send(200, conversation.list_personas())
         else:
@@ -74,5 +74,5 @@ def make_server(port: int) -> ThreadingHTTPServer:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    print(f"Brain listening on :{port} (provider={llm.provider()})", flush=True)
+    print(f"Brain listening on :{port} (provider={llm.provider() or 'offline'})", flush=True)
     make_server(port).serve_forever()

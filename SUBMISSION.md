@@ -9,50 +9,48 @@
 * Shayan Khattak
 
 ## One line pitch
-* Pitch your idea as a famous founder, and a council of sarcastic AI minds judges your idea and how well you can LARP as one of them.
+* A Meet style call where AI versions of Steve Jobs, Elon Musk, Sam Altman and Warren Buffett question your idea or life decision out loud and tell you what to do next.
 
 ## Short description
-* LARP Council has two modes on one engine.
-* Roast mode: you pitch as yourself. An idea scorer rates originality, feasibility and effort. The score sets each mind's mood. Weak ideas make the minds interrupt each other, blame each other, and sometimes rage quit. Great ideas get a slow clap.
-* LARP mode: you pick a mind, such as the Perfectionist, and pitch in that mind's style by voice or text. The other minds react out loud and roast you if you break character. You get a Character Consistency Score and an Embarrassment Score.
-* The minds are AI parodies inspired by public figures. They are not the real people. Their voices are designed from text descriptions with ElevenLabs Voice Design. They are not cloned from anyone.
+* You type an idea, join the call, and the council talks to you like a real meeting.
+* One persona opens with a question specific to your idea. You answer by voice or text.
+* Other personas follow up, agree or disagree, each in their own documented way of thinking.
+* After a few rounds you end the call. Each persona gives a take and a score out of 10, and you get three next steps.
+* It works for startups, projects and life decisions.
 
 ## Theme fit
 * Theme: "Create a product to help you LARP as someone you are not."
-* LARP mode lets you borrow how a famous founder thinks and talks: their principles, pace and verbal habits.
-* The other minds tell you out loud whether you pulled it off, so you practise being someone else and get instant feedback.
-* The Principle trace panel shows which principle each line came from.
-
-## How it was built
-* Three independent parts joined by one JSON contract (version 1).
-* Part A, Voice Studio (Node): ElevenLabs Voice Design voices, one per mind. Lines are spoken with audio tags such as [sighs] and [pause], interruptions, a door slam rage quit and a slow clap. Audio is cached on disk so the demo works offline.
-* Part B, Brain (Python): idea scorer, mood engine, debate generator, character scorer and verdict. It uses Claude when a key is set and falls back to offline scripts when not.
-* Part C, Hub and UI (Node): serves the UI, asks the Brain for a debate, and pushes events over WebSocket to a live dashboard with moods, scores and the principle trace.
-* If one part is down, the others still run (demo replay, text only, or offline scripts).
+* You get to sit in a room with how famous builders think and practise defending your idea to them.
+* It is LARPing a boardroom with legends.
 
 ## Prize track
 * Best Use of ElevenLabs only.
-* Why voice makes it better:
-  * The product is about sounding like someone else, so hearing a distinct voice per mind is the point, not decoration.
-  * Interruptions, overlapping reactions, a rage quit and a slow clap only work as sound.
-  * Audio tags give sarcasm and timing that text cannot show.
-  * You pitch by voice and the council answers by voice, so it feels like a real room.
+* Each persona has its own voice, made with ElevenLabs Voice Design or the ElevenLabs voice library.
+* Voices are designed, never cloned.
+* Eleven v3 audio tags give natural delivery, such as sighs, laughs and pauses.
+* Speech is live, so it feels like a real call and not a text chat.
 
-## Access instructions
-* Run it locally: see RUN.md. No keys are needed for a mock run.
-* Live URL: TO FILL (hub URL after deploy)
-* Voice Studio: runs on the presenter laptop during judging so the ElevenLabs key stays private (see RUN.md)
-* Repo URL: https://github.com/areejubaid/larp-council
+## How it was built
+* Three independent parts joined by one JSON turn contract (version 2).
+* Brain (Python): persona profiles built from public material, and an LLM through Anthropic or Featherless. An offline fallback keeps it working with no key.
+* Hub and UI (Node): a Meet style call screen animated with GSAP, plus a hub that proxies turns to the Brain.
+* Voice Studio (Node): ElevenLabs voices with caching and a request queue.
+* If one part is down, the others still run.
+
+## Repo and access
+* Repo: https://github.com/areejubaid/larp-council
+* Access: run `./start.sh` (see RUN.md).
+* Live URL: runs locally for judging, see RUN.md
 
 ## Judging criteria
-* Working Product: all three services run locally, the Brain and Hub are set up for free Render deploys, with offline fallbacks so the demo does not depend on the network. Tests pass for the Brain and the Hub.
-* Usefulness: it is a safe, funny way to practise pitching and to learn how successful founders reason, with feedback on both the idea and the style.
-* Theme: LARP mode is the core. You play a founder's mind and get scored on how consistent you are.
-* Creativity: sarcastic AI minds that interrupt, blame, rage quit and slow clap, plus a Character Consistency Score and an Embarrassment Score.
-* Ease of Use: open the page, press a demo button or speak a pitch, and listen. Typing works if the mic does not.
-* Demo: a two minute flow, bad idea for the rage quit, a great idea for the slow clap, then a live LARP round with a judge.
+* Working Product: three services start with one command, with an offline fallback so the demo never depends on one API.
+* Usefulness: you rehearse defending an idea or decision and leave with a score and concrete next steps.
+* Theme: you LARP a boardroom of legends and answer to how they think.
+* Creativity: a live back and forth call where personas follow up, agree and disagree with each other, not a single answer.
+* Ease of Use: type one idea, press Join the call, then talk or type.
+* Demo: a short call that shows distinct voices, a real follow up, then the closing scores and next steps.
 
 ## Honesty note
-* The minds are AI parodies inspired by public figures, not the real people.
-* Voices are designed from text descriptions, not cloned.
-* Principle source notes describe the kind of public source only. They contain no quotes or links.
+* The personas are AI simulations inspired by public interviews and writing. They are not the real people.
+* Nothing the personas say is a real quote.
+* Voices are designed or from the voice library, never cloned.

@@ -296,3 +296,17 @@ button, input, textarea { font: inherit; color: inherit; }
   .bars i { transform: none; }
   .bars i:nth-child(odd) { height: 60%; }
 }
+
+/* Reply + stance tags */
+.cap-tag { display: inline-block; margin-right: 8px; padding: 2px 8px; border-radius: 999px; font-size: .8125rem; font-weight: 600; color: var(--muted); border: 1px solid var(--line); vertical-align: middle; }
+.cap-tag[hidden] { display: none; }
+.msg-reply { margin-left: 8px; font-weight: 500; font-size: .8125rem; color: var(--muted); }
+.stance { margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: .75rem; font-weight: 650; border: 1px solid var(--line); color: var(--text); }
+.stance-agrees { border-color: #4caf7d; color: #8fe0b2; }
+.stance-disagrees { border-color: #e0685f; color: #f2a29b; }
+.stance-challenges { border-color: #e0a23c; color: #f0c778; }
+.stance-asks { border-color: #5aa0e0; color: #9cc8f2; }
+.stance-advises { border-color: #a98be0; color: #c9b6f2; }
+.captions-status:not(:empty) { animation: statuspulse 1.6s ease-in-out infinite; }
+@keyframes statuspulse { 50% { opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .captions-status:not(:empty) { animation: none; } }

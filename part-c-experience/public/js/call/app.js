@@ -234,9 +234,20 @@ function setThinking(on, onlyId) {
     t.classList.toggle('thinking', on && (!onlyId || id === onlyId));
   }
 }
-function setCaption(speakerName, text, color) {
+const STANCES = { agrees: 'Agrees', agree: 'Agrees', disagrees: 'Disagrees', disagree: 'Disagrees', challenges: 'Challenges', challenge: 'Challenges', asks: 'Asks', ask: 'Asks', advises: 'Advises', advise: 'Advises' };
+function stanceLabel(st) { return STANCES[String(st ?? '').toLowerCase().trim()] || ''; }
+function replyLabel(turn) {
+  const to = turn?.replyTo;
+  if (!to || typeof to !== 'string' || to === turn.speaker) return '';
+  return 'replying to ' + nameOf(to);
+}
+function setCaption(speakerName, text, color, tag = '') {
   const body = $('captions');
   $('cap-speaker').textContent = speakerName ? speakerName + ':' : '';
+  let t = $('cap-tag');
+  if (!t) { t = el('span', 'cap-tag'); t.id = 'cap-tag'; $('cap-speaker').after(t); }
+  t.textContent = tag;
+  t.hidden = !tag;
   $('cap-text').textContent = text;
   if (color) $('cap-speaker').style.setProperty('--c', color);
   body.classList.toggle('empty', !text);
@@ -252,7 +263,7 @@ function setAwaiting(on, askerId) {
   if (on) {
     const who = nameOf(askerId);
     setStatus(`${who} asked you something. Answer by voice or text.`);
-    $('reply').placeholder = `Answer ${who.split(' ')[0]}`;
+    $('reply').placeholder = `Answer ${who}`;
     setPersonState('user', 'Your turn', true);
     $('reply').focus({ preventScroll: true });
   } else {
@@ -262,7 +273,7 @@ function setAwaiting(on, askerId) {
 }
 
 /* ---------------- transcript ---------------- */
-function addChat(speaker, text) {
+function addChat(speaker, text, turn) {
   $('chat-empty').hidden = true;
   const me = speaker === 'user';
   const li = el('li', 'msg' + (me ? ' me' : ''));
@@ -274,6 +285,10 @@ function addChat(speaker, text) {
     who.append(dot);
   }
   who.append(document.createTextNode(nameOf(speaker)));
+  const rl = turn ? replyLabel(turn) : '';
+  if (rl) who.append(el('span', 'msg-reply', rl));
+  const sl = turn ? stanceLabel(turn.stance) : '';
+  if (sl) { const c = el('span', 'stance stance-' + sl.toLowerCase(), sl); who.append(c); }
   li.append(who, el('span', 'msg-text', stripAudioTags(text)));
   const chat = $('chat');
   chat.appendChild(li);
@@ -350,7 +365,7 @@ async function runTurn(endCall) {
   $('call-error').hidden = true;
   setRequesting(true);
   setThinking(true);
-  setStatus(endCall ? 'The council is writing up its notes...' : 'The council is thinking...');
+  setStatus(endCall ? 'The council is writing up its notes...' : 'The council is thinking');
   state.lastRequest = () => runTurn(endCall);
   let data;
   try {
@@ -405,9 +420,9 @@ async function presentTurn(turn, ctl) {
     shown = true;
     setThinking(false);
     setSpeaker(speaker);
-    setCaption(p?.name ?? speaker, clean, safeColor(p?.color));
+    setCaption(p?.name ?? speaker, clean, safeColor(p?.color), [replyLabel(turn), stanceLabel(turn.stance)].filter(Boolean).join(' · '));
     setStatus('');
-    addChat(speaker, text);
+    addChat(speaker, text, turn);
   };
   if (ctl.signal.aborted) { showNow(); setSpeaker(null); return; } // user cut in: log it, no audio
   let played = false;
@@ -439,7 +454,7 @@ function interruptCouncil() {
   while (state.pending.length) {
     const t = state.pending.shift();
     state.history.push({ speaker: t.speaker, text: t.text });
-    addChat(t.speaker, t.text);
+    addChat(t.speaker, t.text, t);
   }
 }
 
@@ -517,7 +532,7 @@ function showSummary(summary) {
     const head = el('div', 'take-head');
     const av = el('span', 'mini-avatar', initials(p.name)); av.setAttribute('aria-hidden', 'true');
     const nm = el('div'); nm.append(el('div', 'take-name', p.name), el('div', 'take-role', p.role || ''));
-    const score = el('div', 'score'); score.append(document.createTextNode(String(pp.score ?? '-')), el('small', null, '/10'));
+    const score = el('div', 'score'); score.style.color = safeColor(p.color, i); score.append(document.createTextNode(String(pp.score ?? '-')), el('small', null, '/10'));
     score.setAttribute('aria-label', `Score ${pp.score ?? 'none'} out of 10`);
     head.append(av, nm, score);
     li.append(head, el('p', 'take-text', pp.take || ''));

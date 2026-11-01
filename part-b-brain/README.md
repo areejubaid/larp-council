@@ -36,6 +36,17 @@ Unit tests: `python -m unittest discover -s tests -t .`
 
 Every Claude call falls back to the offline script on error, so the demo never depends on the network.
 
+## Model providers
+
+The Brain picks a provider from the keys it finds. No key means offline mode (built-in scripts).
+
+| Provider | Env vars | Notes |
+| --- | --- | --- |
+| Anthropic | `ANTHROPIC_API_KEY`, `BRAIN_MODEL` | Used first if its key is set. |
+| Featherless | `FEATHERLESS_API_KEY`, `FEATHERLESS_MODEL` | Free hackathon credits. Pick a model id from featherless.ai/models. |
+
+`BRAIN_PROVIDER=anthropic|featherless` forces one. Locally, put the keys in `part-b-brain/.env` (git-ignored, read automatically; see `.env.example`). On Render, set them in the service's Environment tab. `GET /health` shows which provider is active (`"provider": "offline"` means none). If a model call fails, the Brain logs the reason to stderr and falls back to the offline script for that step, so a demo never hard-fails.
+
 ## Deploy on Render (free Web Service)
 
 `server.py` is a small HTTP server (standard library only):

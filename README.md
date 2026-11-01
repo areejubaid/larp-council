@@ -1,38 +1,27 @@
+Current version: LARP Council. See plan.md for the turn contract. Sections below 3 describe the earlier Mind Council design and are kept for history.
+
 # LARP Council
 
 LarpHacks 2026 project. Last updated: November 1, 2026. Owner of this file: the team lead. Update the Changelog at the bottom whenever something changes.
 
 ## 1. One line pitch
 
-Pitch your idea as a famous founder. A council of sarcastic AI minds judges your idea, and judges how well you can LARP as one of them.
+A Meet style call where AI versions of Steve Jobs, Elon Musk, Sam Altman and Warren Buffett question your idea or life decision out loud, then give you scores and next steps.
 
 ## 2. Theme fit
 
 The main track theme: "Create a product to help you LARP as someone you are not."
 
-LARP Council gives you a way to LARP as the way a famous founder thinks and talks. You borrow their principles, their pace, and their verbal habits, and the other minds tell you out loud whether you pulled it off.
+* You sit in a room with how famous builders think and practise defending your idea to them.
+* It is LARPing a boardroom with legends.
 
 ## 3. What the product does
 
-Two modes, one engine.
-
-* LARP Mode (headline mode, best theme fit)
-  * You pick a mind (for example the Perfectionist).
-  * You pitch your idea in that mind's style, by voice or text.
-  * The other minds react, interrupt, and roast you if you break character.
-  * You receive a Character Consistency Score and an Embarrassment Score.
-* Roast Mode (fast and funny)
-  * You pitch as yourself.
-  * An idea scorer rates originality, feasibility, and effort.
-  * The score sets each mind's mood, and weak ideas make the minds argue with each other.
-
-Funny moments to build in:
-* Interruptions: a mind cuts off another mid sentence when the idea is bad.
-* Blame game: minds argue about whose fault it is that this idea exists.
-* Rivalries: each pair of minds has a standing disagreement.
-* Slow clap: for a great idea, all minds go silent, then one grudgingly says fine.
-* Rage quit: a mind leaves the call when the idea is bad enough.
-* Roast the room: a 15 second roast and a final Embarrassment Score.
+* You type an idea, join the call, and one persona opens with a question specific to your idea.
+* You answer by voice or text. Other personas follow up, agree or disagree in their own documented way of thinking.
+* When you end the call, each persona gives a take and a score out of 10, and you get next steps.
+* Personas are AI simulations inspired by public interviews and writing. They are not the real people, and nothing is a real quote.
+* Each persona has its own ElevenLabs voice, designed or from the voice library, never cloned.
 
 ## 4. The minds
 

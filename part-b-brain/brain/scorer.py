@@ -41,7 +41,8 @@ def score_idea(pitch: str, use_llm: bool = True) -> dict:
             raw = llm.ask_json(SYSTEM, f"Pitch:\n{pitch}")
             for k in ("originality", "feasibility", "effort"):
                 raw[k] = _clamp(raw[k])
-        except Exception:
+        except Exception as e:
+            llm.note_failure(e)
             raw = None
     if raw is None:
         raw = score_offline(pitch)

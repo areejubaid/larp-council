@@ -8,6 +8,10 @@
 set -u
 cd "$(dirname "$0")"
 ROOT="$(pwd)"
+# Keys can live in a .env file at the repo root (git-ignored), for example:
+#   ELEVENLABS_API_KEY=...
+#   FEATHERLESS_API_KEY=...
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
 mkdir -p "$ROOT/.logs"
 
 if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
