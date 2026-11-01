@@ -144,7 +144,7 @@ def _featherless_text(system: str, user: str, max_tokens: int, timeout: float) -
         "model": os.environ.get("FEATHERLESS_MODEL", DEFAULT_FEATHERLESS_MODEL),
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         "max_tokens": max_tokens,
-        "temperature": 0.8,
+        "temperature": 0.6,
     }).encode()
     req = urllib.request.Request(
         os.environ.get("FEATHERLESS_BASE_URL", FEATHERLESS_URL).rstrip("/") + "/chat/completions", data=body, method="POST",
@@ -159,7 +159,7 @@ def _featherless_text(system: str, user: str, max_tokens: int, timeout: float) -
     return data["choices"][0]["message"]["content"] or ""
 
 
-def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TIMEOUT_SECONDS, retries: int = 2):
+def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TIMEOUT_SECONDS, retries: int = 3):
     """Strict JSON from the active provider. Retries once on invalid JSON, then raises LLMError."""
     prov = provider()
     if prov == "offline":

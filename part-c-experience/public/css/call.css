@@ -312,3 +312,10 @@ button, input, textarea { font: inherit; color: inherit; }
 .captions-status:not(:empty) { animation: statuspulse 1.6s ease-in-out infinite; }
 @keyframes statuspulse { 50% { opacity: .6; } }
 @media (prefers-reduced-motion: reduce) { .captions-status:not(:empty) { animation: none; } }
+
+/* LARP reaction tags */
+.react { position: absolute; left: 50%; top: 18%; z-index: 5; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: clamp(1rem, 2.4cqw, 1.5rem); letter-spacing: .01em; pointer-events: none; white-space: nowrap; animation: reactfloat 2.4s cubic-bezier(.2,.8,.2,1) forwards; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.react-hype { background: #b7f35a; color: #12210a; }
+.react-roast { background: #ff5d5d; color: #2a0505; }
+@keyframes reactfloat { 0% { opacity: 0; transform: translate(-50%, 24px) scale(.6) rotate(-4deg); } 14% { opacity: 1; transform: translate(-50%, 0) scale(1.15) rotate(2deg); } 24% { transform: translate(-50%, -4px) scale(1) rotate(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70px) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .react { animation: reactfade 2.4s forwards; } @keyframes reactfade { 0%, 80% { opacity: 1; transform: translateX(-50%); } 100% { opacity: 0; transform: translateX(-50%); } } }

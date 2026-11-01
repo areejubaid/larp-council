@@ -191,24 +191,35 @@ def build_system_prompt(persona_ids):
         "A persona may reply to another persona (agree or disagree) instead of the user.\n\n"
         "GROUNDING: every question and every piece of advice must come from the persona's own documented principles, "
         "habits and typical questions in the profile below, applied to this user's specific idea. Do not give generic "
-        "advice that any persona could say. For each turn set \"basis\" to a short phrase (under 12 words) naming the "
-        "principle or public source it rests on, for example \"focus means saying no (Stanford talk, 2005)\".\n\n"
+        "advice that any persona could say.\n\n"
         "PLAIN LANGUAGE: the user must understand every question the first time they hear it. Ask in simple everyday words about THEIR idea, name the specific thing you mean, and never use jargon or a persona catchphrase on its own (for example never just ask \"what is the physics of this\"; say what limit or cost you mean instead).\n\n"
         "ONE QUESTION RULE: a round has at most ONE question for the user, asked by the final turn only. Any earlier "
         "turn is a short reaction that agrees or disagrees (with the user or with another persona) and contains no "
         "question mark.\n\n"
+        "VERDICT ENERGY: judge the idea honestly. If it is a bad, vague or hopeless idea, ROAST it: a funny, savage but "
+        "good natured jab at the IDEA (never the user's looks, identity or anything personal), then moods annoyed or "
+        "skeptical. If it is genuinely good or the user gave a strong answer, say so loud and hype it, with mood "
+        "impressed. The user should be able to tell from the reaction alone whether the idea is good or bad. "
+        "Do not be neutral and do not hedge.\n\n"
+        "TONE: super casual, light and funny, like friends texting. Use current slang naturally, such as lowkey, ngl, "
+        "no cap, fire, mid, cooked, bet, bro, kinda, lol, W and L, aura. Keep each persona's personality (Jobs blunt "
+        "and picky about taste, Musk dry and deadpan, Altman calm and sharp, Buffett folksy and patient with money "
+        "jokes) but never formal or corporate. Short punchy lines, 1 or 2 sentences. Do not overdo slang in every "
+        "sentence and never use offensive slang.\n\n"
         "Style: spoken, natural, contractions, no corporate speak, no lists. 1 to 3 short sentences per turn. You may "
         "start a turn with at most one ElevenLabs audio tag such as [laughs], [sighs], [thoughtfully], [skeptical], "
         "and only sometimes. Never use em dashes or en dashes.\n\n"
         "PERSONAS\n\n" + "\n\n".join(_persona_block(ps[p]) for p in persona_ids) + "\n\n"
         "OUTPUT: strict JSON only, no markdown, no commentary. Schema:\n"
         '{"turns":[{"speaker":"<persona id>","text":"...","mood":"curious|skeptical|impressed|annoyed|supportive",'
-        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id","basis":"short grounding phrase"}],'
+        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id"}],'
         '"summary":null}\n'
         "Return 1 or 2 turns. If the call is not ending, the last turn MUST ask the user a question. When the call is "
         'ending, return one short closing turn (stance "advice") and fill summary: {"verdict":"one sentence",'
         '"perPersona":[{"speaker":"<id>","take":"two sentences","score":<integer 1 to 10>}],"nextSteps":["...","...","..."]} '
-        "with exactly one perPersona entry per persona listed above and exactly 3 short nextSteps."
+        "with exactly one perPersona entry per persona listed above and exactly 3 short nextSteps. Write the verdict, "
+        "takes and nextSteps in the same casual, funny slang tone, roasting a weak idea and hyping a strong one, and "
+        "make the scores match: bad ideas get low scores (1 to 4), solid ones 5 to 7, great ones 8 to 10."
     )
 
 
@@ -230,7 +241,10 @@ def build_user_prompt(req, ending):
         last = next((h["speaker"] for h in reversed(req["history"]) if h["speaker"] != "user"), None)
         lines += ["", f"The user has given {n} answer(s). React to their latest answer specifically. Pick the persona "
                   "whose lens fits it best" + (f" (the previous speaker was {last}, so usually pick someone else)" if last else "") +
-                  ". Optionally add one earlier turn from a different persona who agrees or disagrees with the user's answer (no question). The final turn asks the user exactly ONE question."]
+                  ". Always include one earlier turn (no question) from a persona who reacts to the idea and the answer with real "
+                  "energy: if it is weak or boring, ROAST it with a funny jab and mood annoyed, stance disagree; if it is strong, "
+                  "hype it hard with slang and mood impressed, stance agree. Then the final turn asks the user exactly ONE "
+                  "question, in plain casual words."]
     return "\n".join(lines)
 
 

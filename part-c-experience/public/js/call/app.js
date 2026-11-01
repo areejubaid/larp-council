@@ -253,6 +253,21 @@ function setCaption(speakerName, text, color, tag = '') {
   body.classList.toggle('empty', !text);
   animate((g) => g.fromTo(body, { opacity: 0.2, y: 6 }, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', clearProps: 'transform,opacity' }));
 }
+/* LARP reactions: a floating tag on the speaker's tile when they are impressed or roast the idea. */
+const HYPE_TAGS = ['+1 Aura', '+1 W', '+1 Respect', '+1 Rizz'];
+const ROAST_TAGS = ['Roasted', 'Cooked', 'Big L', 'Mid'];
+function reactionPopup(speakerId, mood) {
+  const tile = tiles.get(speakerId);
+  if (!tile || (mood !== 'impressed' && mood !== 'annoyed')) return;
+  const hype = mood === 'impressed';
+  const pool = hype ? HYPE_TAGS : ROAST_TAGS;
+  const tag = el('div', 'react ' + (hype ? 'react-hype' : 'react-roast'), (hype ? '' : '\uD83D\uDD25 ') + pool[Math.floor(Math.random() * pool.length)]);
+  tag.setAttribute('aria-hidden', 'true');
+  tile.appendChild(tag);
+  setTimeout(() => tag.remove(), 2600);
+  const live = $('captions-status');
+  if (live && hype) live.setAttribute('data-react', speakerId);
+}
 function setStatus(text) { $('captions-status').textContent = text; }
 function clearCaption() { $('cap-speaker').textContent = ''; $('cap-text').textContent = ''; $('captions').classList.add('empty'); }
 
@@ -421,8 +436,9 @@ async function presentTurn(turn, ctl) {
     shown = true;
     setThinking(false);
     setSpeaker(speaker);
-    setCaption(p?.name ?? speaker, clean, safeColor(p?.color), [replyLabel(turn), stanceLabel(turn.stance), turn.basis ? `Based on: ${turn.basis}` : ''].filter(Boolean).join(' · '));
+    setCaption(p?.name ?? speaker, clean, safeColor(p?.color), '');
     setStatus('');
+    reactionPopup(speaker, turn.mood);
     addChat(speaker, text, turn);
   };
   if (ctl.signal.aborted) { showNow(); setSpeaker(null); return; } // user cut in: log it, no audio
