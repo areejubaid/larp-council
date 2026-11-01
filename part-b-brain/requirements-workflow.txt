@@ -1,0 +1,2 @@
+-r requirements.txt
+render>=1.6
