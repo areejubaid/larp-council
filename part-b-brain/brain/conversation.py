@@ -317,6 +317,20 @@ def build_user_prompt(req, ending):
     return "\n".join(lines)
 
 
+_SOFTEN = [(re.compile(p, re.I), r) for p, r in [
+    (r"\bmotherfuck\w*", "mother-freaking"), (r"\bfuck(?:ing|ed|er)\b", "freaking"), (r"\bfuck\w*", "heck"),
+    (r"\bbullshit\b", "nonsense"), (r"\bshit(?:ty)?\b", "crap"), (r"\bdamn\w*", "darn"), (r"\bass(?:hole)?\b", "jerk"),
+    (r"\bbitch\w*", "jerk"), (r"\bdick\w*", "jerk"), (r"\bpiss\w*", "annoy"),
+]]
+
+
+def _soften(text):
+    """Personas never say profanity out loud, even when they repeat what the user said."""
+    for rx, rep in _SOFTEN:
+        text = rx.sub(rep, text)
+    return text
+
+
 _DASHES = re.compile(r"\s*[–—]\s*")
 
 
@@ -329,7 +343,7 @@ def _coerce(raw, req, ending):
     for t in (raw.get("turns") or [])[:2]:
         if not isinstance(t, dict):
             raise ValueError("bad turn")
-        text = _DASHES.sub(", ", str(t.get("text", "")).replace("“", "").replace("”", "")).strip()
+        text = _soften(_DASHES.sub(", ", str(t.get("text", "")).replace("“", "").replace("”", "")).strip())
         mood = t.get("mood") if t.get("mood") in TURN_MOODS else "curious"
         stance = t.get("stance") if t.get("stance") in TURN_STANCES else "question"
         reply = t.get("replyTo") if (t.get("replyTo") == "user" or t.get("replyTo") in ids) else "user"
