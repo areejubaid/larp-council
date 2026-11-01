@@ -281,7 +281,7 @@ button, input, textarea { font: inherit; color: inherit; }
 @media (max-width: 640px) {
   .persona-list { grid-template-columns: 1fr; }
   .takes { grid-template-columns: 1fr; }
-  .leave-text, .btn-send .btn-text, .ctl-text .ic { display: none; }
+  .leave-text, .btn-send .btn-text, .ctl-text .ic, .mic-label { display: none; }
   .controls { gap: 8px; }
   .ctl-group { gap: 6px; }
   .ctl-leave { padding: 0; width: 48px; }

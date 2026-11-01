@@ -189,13 +189,20 @@ def build_system_prompt(persona_ids):
         "voice and pace. Reference specifics of the user's idea and their latest answer (names, numbers, words they "
         "used) so the reply could not be pasted onto a different idea. Different personas should disagree sometimes. "
         "A persona may reply to another persona (agree or disagree) instead of the user.\n\n"
+        "GROUNDING: every question and every piece of advice must come from the persona's own documented principles, "
+        "habits and typical questions in the profile below, applied to this user's specific idea. Do not give generic "
+        "advice that any persona could say. For each turn set \"basis\" to a short phrase (under 12 words) naming the "
+        "principle or public source it rests on, for example \"focus means saying no (Stanford talk, 2005)\".\n\n"
+        "ONE QUESTION RULE: a round has at most ONE question for the user, asked by the final turn only. Any earlier "
+        "turn is a short reaction that agrees or disagrees (with the user or with another persona) and contains no "
+        "question mark.\n\n"
         "Style: spoken, natural, contractions, no corporate speak, no lists. 1 to 3 short sentences per turn. You may "
         "start a turn with at most one ElevenLabs audio tag such as [laughs], [sighs], [thoughtfully], [skeptical], "
         "and only sometimes. Never use em dashes or en dashes.\n\n"
         "PERSONAS\n\n" + "\n\n".join(_persona_block(ps[p]) for p in persona_ids) + "\n\n"
         "OUTPUT: strict JSON only, no markdown, no commentary. Schema:\n"
         '{"turns":[{"speaker":"<persona id>","text":"...","mood":"curious|skeptical|impressed|annoyed|supportive",'
-        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id"}],'
+        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id","basis":"short grounding phrase"}],'
         '"summary":null}\n'
         "Return 1 or 2 turns. If the call is not ending, the last turn MUST ask the user a question. When the call is "
         'ending, return one short closing turn (stance "advice") and fill summary: {"verdict":"one sentence",'
@@ -222,7 +229,7 @@ def build_user_prompt(req, ending):
         last = next((h["speaker"] for h in reversed(req["history"]) if h["speaker"] != "user"), None)
         lines += ["", f"The user has given {n} answer(s). React to their latest answer specifically. Pick the persona "
                   "whose lens fits it best" + (f" (the previous speaker was {last}, so usually pick someone else)" if last else "") +
-                  ". Optionally add a second persona who agrees or disagrees with the first. The final turn must ask the user a question."]
+                  ". Optionally add one earlier turn from a different persona who agrees or disagrees with the user's answer (no question). The final turn asks the user exactly ONE question."]
     return "\n".join(lines)
 
 
@@ -242,7 +249,11 @@ def _coerce(raw, req, ending):
         mood = t.get("mood") if t.get("mood") in TURN_MOODS else "curious"
         stance = t.get("stance") if t.get("stance") in TURN_STANCES else "question"
         reply = t.get("replyTo") if (t.get("replyTo") == "user" or t.get("replyTo") in ids) else "user"
-        turns.append({"speaker": t.get("speaker"), "text": text, "mood": mood, "stance": stance, "replyTo": reply})
+        turn = {"speaker": t.get("speaker"), "text": text, "mood": mood, "stance": stance, "replyTo": reply}
+        basis = _DASHES.sub(", ", str(t.get("basis") or "")).strip()
+        if basis:
+            turn["basis"] = basis[:140]
+        turns.append(turn)
     resp = {"turns": turns, "awaitingUser": not ending, "done": ending, "summary": None}
     if ending:
         s = raw.get("summary")
@@ -263,6 +274,32 @@ def _coerce(raw, req, ending):
             "perPersona": [p for p in per if p["speaker"] in ids],
             "nextSteps": [_DASHES.sub(", ", str(x)) for x in (s.get("nextSteps") or [])][:3],
         }
+    return resp
+
+
+_SENT = re.compile(r"[^.!?]*[.!?]+|[^.!?]+$")
+
+
+def _one_question(resp):
+    """At most one question per round: earlier turns lose their questions, the last turn keeps its first one."""
+    turns = resp["turns"]
+    for i, t in enumerate(turns):
+        sents = [x.strip() for x in _SENT.findall(t["text"]) if x.strip()]
+        if i < len(turns) - 1:
+            sents = [x for x in sents if not x.endswith("?")]
+            if t["stance"] in ("question", "challenge"):
+                t["stance"] = "disagree" if t["stance"] == "challenge" else "agree"
+        else:
+            out = []
+            for x in sents:
+                out.append(x)
+                if x.endswith("?"):
+                    break
+            sents = out
+        t["text"] = " ".join(sents)
+    resp["turns"] = [t for t in turns if t["text"]]
+    if resp["turns"]:
+        resp["turns"][-1]["stance"] = "question" if resp["turns"][-1]["text"].endswith("?") else resp["turns"][-1]["stance"]
     return resp
 
 
@@ -291,4 +328,6 @@ def next_turns(request, use_llm=None):
             print(f"/turn LLM fallback to offline: {e!r}", flush=True)
     if resp is None:
         resp = _offline_done(req) if ending else _offline_turns(req)
+    if not ending:
+        resp = _one_question(resp)
     return validate_turn_response(resp, req["personas"])

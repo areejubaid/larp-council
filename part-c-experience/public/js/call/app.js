@@ -27,7 +27,7 @@ const state = {
   timerId: 0,
   lastRequest: null,  // () => Promise, used by the Retry button
   summary: null,
-  mic: { active: false, rec: null, holdStart: 0, wasIdle: false, suppressClick: false },
+  mic: { enabled: false, active: false, rec: null, discard: false, heard: false, lastSpeechAt: 0, startedAt: 0, ticker: 0, failures: 0 },
   panelTab: 'chat',
 };
 const tiles = new Map(); // id -> element
@@ -265,7 +265,8 @@ function setAwaiting(on, askerId) {
     setStatus(`${who} asked you something. Answer by voice or text.`);
     $('reply').placeholder = `Answer ${who}`;
     setPersonState('user', 'Your turn', true);
-    $('reply').focus({ preventScroll: true });
+    if (state.mic.enabled) setTimeout(autoListen, 450);
+    else $('reply').focus({ preventScroll: true });
   } else {
     $('reply').placeholder = 'Type your answer';
     setPersonState('user', 'Mic ready', false);
@@ -420,7 +421,7 @@ async function presentTurn(turn, ctl) {
     shown = true;
     setThinking(false);
     setSpeaker(speaker);
-    setCaption(p?.name ?? speaker, clean, safeColor(p?.color), [replyLabel(turn), stanceLabel(turn.stance)].filter(Boolean).join(' · '));
+    setCaption(p?.name ?? speaker, clean, safeColor(p?.color), [replyLabel(turn), stanceLabel(turn.stance), turn.basis ? `Based on: ${turn.basis}` : ''].filter(Boolean).join(' · '));
     setStatus('');
     addChat(speaker, text, turn);
   };
@@ -459,6 +460,7 @@ function interruptCouncil() {
 }
 
 function sendAnswer(text, endCall = false) {
+  if (state.mic.active) { state.mic.discard = true; stopMic(); }
   interruptCouncil();
   const clean = String(text ?? '').trim();
   if (clean) {
@@ -480,38 +482,97 @@ function grabRecognizer() {
   window[key] = function Wrapped() { const r = new Orig(); state.mic.rec = r; return r; };
   return () => { window[key] = Orig; };
 }
+const SILENCE_MS = 5000;     // quiet this long after you spoke and the answer is sent
+const NUDGE_MS = 12000;      // nothing said at all: gentle nudge, keep listening
+
+function micSupported() {
+  return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition) && isVoiceAvailable();
+}
+function paintMicButton() {
+  const on = state.mic.enabled;
+  const btn = $('mic-btn');
+  btn.setAttribute('aria-pressed', String(on));
+  btn.setAttribute('aria-label', on ? 'Microphone on. Click to turn off.' : 'Microphone off. Click to turn on.');
+  btn.querySelector('use')?.setAttribute('href', on ? '#i-mic' : '#i-mic-off');
+  const label = btn.querySelector('.mic-label');
+  if (label) label.textContent = on ? 'Mic on' : 'Mic off';
+}
+function setMicEnabled(on) {
+  if (on && !micSupported()) {
+    toast('Voice answers need Chrome or Edge with the voice server running. Type your answer instead.');
+    on = false;
+  }
+  state.mic.enabled = on;
+  state.mic.failures = 0;
+  paintMicButton();
+  if (on) {
+    if (state.awaiting && !state.mic.active) autoListen();
+    else if (!state.awaiting && !state.ended) setStatus('Mic is on. I will listen after the next question.');
+  } else if (state.mic.active) {
+    state.mic.discard = true; // keep what was said in the box, do not send it
+    stopMic();
+  } else if (state.awaiting) {
+    setStatus('Mic is off. Type your answer.');
+  }
+}
+function autoListen() {
+  if (state.mic.enabled && state.awaiting && !state.mic.active && !state.ended && !state.requesting) startMic();
+}
 async function startMic() {
   if (state.mic.active || state.ended) return;
-  if (!isVoiceAvailable()) {
-    toast('Voice is not connected here. Type your answer instead.');
-    return;
-  }
+  if (!micSupported()) { setMicEnabled(false); return; }
   interruptCouncil();
-  state.mic.active = true;
-  state.mic.rec = null;
-  $('mic-btn').setAttribute('aria-pressed', 'true');
+  Object.assign(state.mic, { active: true, rec: null, discard: false, heard: false, lastSpeechAt: 0, startedAt: Date.now() });
+  $('reply').value = '';
   tiles.get('user')?.classList.add('listening');
   tiles.get('user')?.classList.remove('awaiting');
-  setStatus('Listening... speak your answer, then tap the mic again.');
-  setPersonState('user', 'Speaking', true);
+  setStatus('Listening... answer out loud. Pause for 5 seconds and I will send it.');
+  setPersonState('user', 'Listening', true);
+  clearInterval(state.mic.ticker);
+  state.mic.ticker = setInterval(() => {
+    if (!state.mic.active) return;
+    const now = Date.now();
+    if (state.mic.heard) {
+      const left = SILENCE_MS - (now - state.mic.lastSpeechAt);
+      if (left <= 0) { stopMic(); return; }
+      setStatus(left <= 3000 ? `Sending in ${Math.ceil(left / 1000)}...` : 'Listening... pause for 5 seconds to send.');
+    } else if (now - state.mic.startedAt > NUDGE_MS) {
+      setStatus('Still listening. Take your time, or type your answer.');
+    }
+  }, 250);
   const restore = grabRecognizer();
   let text = '';
+  let failed = '';
   try {
-    const pending = transcribePitch({ onInterim: (t) => { $('reply').value = t; } });
+    const pending = transcribePitch({ onInterim: (t) => {
+      $('reply').value = t;
+      if (t.trim()) { state.mic.heard = true; state.mic.lastSpeechAt = Date.now(); }
+    } });
     restore();
     text = await pending;
   } catch (err) {
     restore();
-    const msg = String(err?.message ?? '');
-    toast(/not-allowed|denied|service-not-allowed/.test(msg) ? 'Microphone is blocked. Allow it in your browser, or type your answer.' : (msg || 'The microphone did not work. Type your answer instead.'));
+    failed = String(err?.message ?? '');
   }
+  clearInterval(state.mic.ticker);
   state.mic.active = false;
-  $('mic-btn').setAttribute('aria-pressed', 'false');
   tiles.get('user')?.classList.remove('listening');
   setPersonState('user', 'Mic ready', false);
-  const final = (text || $('reply').value).trim();
-  if (final && !state.ended) sendAnswer(final);
-  else if (!state.ended) { setStatus('Did not catch that. Try again or type your answer.'); setAwaiting(true, state.history.at(-1)?.speaker); }
+  if (state.ended || state.mic.discard) return;
+  if (/not-allowed|denied|service-not-allowed/.test(failed)) {
+    toast('Microphone is blocked. Allow it in your browser, or type your answer.');
+    state.mic.enabled = false; paintMicButton();
+    setAwaiting(true, state.history.at(-1)?.speaker);
+    return;
+  }
+  const final = ($('reply').value || text).trim();
+  if (final) { state.mic.failures = 0; sendAnswer(final); return; }
+  // Heard nothing (browser stops listening after a long silence): quietly listen again.
+  state.mic.failures += 1;
+  if (state.mic.enabled && state.mic.failures < 4) { setTimeout(autoListen, 400); return; }
+  if (state.mic.failures >= 4) { toast('The mic is not picking anything up. Type your answer, or turn it back on.'); state.mic.enabled = false; paintMicButton(); }
+  setStatus('Did not catch that. Type your answer.');
+  setAwaiting(true, state.history.at(-1)?.speaker);
 }
 function stopMic() { try { state.mic.rec?.stop(); } catch { /* already stopped */ } }
 
@@ -561,15 +622,17 @@ function resetCall() {
   state.generation += 1;
   state.pending = [];
   interruptCouncil();
+  state.mic.discard = true;
   stopMic();
   clearInterval(state.timerId);
   Object.assign(state, { history: [], pending: [], turnCount: 0, requesting: false, awaiting: false, ended: false, speakerId: null, summary: null, lastRequest: null });
   state.mic.active = false;
+  clearInterval(state.mic.ticker);
   $('chat').replaceChildren();
   $('chat-empty').hidden = false;
   $('reply').value = '';
   $('call-error').hidden = true;
-  $('mic-btn').setAttribute('aria-pressed', 'false');
+  paintMicButton();
   closePanel();
   clearCaption();
 }
@@ -591,6 +654,8 @@ function startCall() {
   buildTiles();
   setRequesting(false);
   show('screen-call');
+  state.mic.enabled = micSupported();
+  paintMicButton();
   startTimer();
   runTurn(false);
 }
@@ -645,22 +710,8 @@ function wire() {
     }
   });
 
-  // Mic: tap to toggle, or hold to talk and release to send.
-  const mic = $('mic-btn');
-  mic.addEventListener('pointerdown', () => {
-    state.mic.holdStart = Date.now();
-    state.mic.wasIdle = !state.mic.active;
-  });
-  mic.addEventListener('pointerup', () => {
-    if (state.mic.wasIdle && state.mic.active && Date.now() - state.mic.holdStart > 650) {
-      state.mic.suppressClick = true;
-      stopMic();
-    }
-  });
-  mic.addEventListener('click', () => {
-    if (state.mic.suppressClick) { state.mic.suppressClick = false; return; }
-    if (state.mic.active) stopMic(); else startMic();
-  });
+  // Mic: an on/off switch. On = hands free interview, the answer sends after 5 quiet seconds.
+  $('mic-btn').addEventListener('click', () => setMicEnabled(!state.mic.enabled));
 
   $('new-call-btn').addEventListener('click', () => { resetCall(); show('screen-landing'); $('idea').value = ''; $('idea').focus({ preventScroll: true }); });
   $('copy-btn').addEventListener('click', async () => {
