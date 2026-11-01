@@ -30,6 +30,6 @@ def score_character(pitch: str, mind_id: str, use_llm: bool = True) -> int:
                     f"Vocabulary: {json.dumps(m['vocabulary'])}\nPitch:\n{pitch}")
             raw = llm.ask_json(SYSTEM, user, max_tokens=200)
             return max(0, min(100, int(raw["score"])))
-        except Exception:
-            pass
+        except Exception as e:
+            llm.note_failure(e)
     return score_offline(pitch, mind_id)

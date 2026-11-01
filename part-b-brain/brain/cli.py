@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import llm
 from .events import Emitter
 from .pipeline import run
 
@@ -34,7 +35,8 @@ def main(argv=None):
         print(text)
     if args.events_out:
         Path(args.events_out).write_text(json.dumps(em.events, indent=2) + "\n", encoding="utf-8")
-    print(f"OK: valid DebateScript, mood={script['ideaScore']['mood']}, {len(script['lines'])} lines, "
+    used = "offline" if args.offline else (llm.provider() or "offline")
+    print(f"OK: valid DebateScript, model provider={used}, mood={script['ideaScore']['mood']}, {len(script['lines'])} lines, "
           f"{len(em.events)} events", file=sys.stderr)
 
 
