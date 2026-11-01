@@ -228,6 +228,15 @@ Done when
 
 Judging criteria served: Working Product, Usefulness, Theme Alignment.
 
+Live Brain API (Render free Web Service, code in `part-b-brain`, details in its README):
+* Base URL: https://larp-council-brain.onrender.com
+* `GET /health` returns `{"ok": true, "llm": <bool>}`.
+* `POST /run` takes a PitchInput and returns `{"script": <DebateScript>, "events": [<Event>, ...]}`. Bad input returns HTTP 400. CORS is open, so the browser can call it directly.
+* Example body: `{"sessionId": "s1", "mode": "roast", "pitchText": "An app that ..."}`. For LARP Mode use `"mode": "larp"` and add `"chosenMindId": "perfectionist"`.
+* Mind ids: `perfectionist`, `engineer`, `operator`.
+* The free tier sleeps when idle. Open `/health` a few minutes before any demo to wake it.
+* Until an Anthropic key is set on the service, it uses built-in offline scripts (`llm` is false in `/health`).
+
 ### Part C: Experience (frontend, event hub, dashboard, deployment, demo)
 Owner: Shayan
 
@@ -338,6 +347,7 @@ Sponsor tracks (scored out of 5 each, separate from the main total)
 
 * November 1, 2026: first full README created. Contract version 1 drafted. Three independent parts defined. Voice policy and Render Workflows notes added from research.
 * November 1, 2026: one sponsor track only, so ElevenLabs is the track. Agentboxd cut, Render Workflows optional. Owners set: Part A Aayan, Part B Areej, Part C Shayan. Part A code added in `part_a_voice` (rage_quit and slow_clap moods, interruption via interruptsLineId).
+* November 1, 2026: Part B Brain deployed as a free Render Web Service (`/health`, `/run`). Contract unchanged. API summary added under Part B.
 
 ## 16. Sources
 
