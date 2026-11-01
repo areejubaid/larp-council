@@ -5,21 +5,21 @@
   "minds": {
     "perfectionist": {
       "label": "The Perfectionist (AI parody)",
-      "voiceId": "",
+      "voiceId": "AjqGehicUIo4namvQs3c",
       "voiceName": "Council Perfectionist",
       "description": "Adult male, calm and measured, deliberate pacing with long pauses, quietly intense, precise, mildly condescending when unimpressed. Clear studio quality recording.",
       "mockPitchHz": 180
     },
     "engineer": {
       "label": "The First Principles Engineer (AI parody)",
-      "voiceId": "",
+      "voiceId": "mjX9dQGCyT0h3kfQlRT9",
       "voiceName": "Council Engineer",
       "description": "Adult male, halting thoughtful cadence with stop and start phrasing, dry deadpan delivery, occasional awkward laugh, speeds up when excited. Clear studio quality recording.",
       "mockPitchHz": 140
     },
     "operator": {
       "label": "The Scale Operator (AI parody)",
-      "voiceId": "",
+      "voiceId": "KrWYKCv2vA7PLMSfnpvU",
       "voiceName": "Council Operator",
       "description": "Young adult male, soft spoken, even and thoughtful, careful complete sentences, gentle tone with a quiet cutting edge. Clear studio quality recording.",
       "mockPitchHz": 220
