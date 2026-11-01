@@ -3,6 +3,7 @@ import { h, clear } from './dom.js';
 import { createFace } from './face.js';
 import { MINDS, MIND_IDS, MOOD_LABEL } from './constants.js';
 import { plain } from './text.js';
+import * as motion from './motion.js';
 
 const BARS = 28;
 const moodText = (mood) => MOOD_LABEL[mood] ?? 'Neutral';
@@ -56,6 +57,7 @@ export function createCards(container) {
       const c = cards.get(mindId);
       if (!c) return;
       c.el.classList.add('speaking');
+      motion.speaking(c.el, true);
       c.bubble.className = 'bubble';
       c.bubble.textContent = plain(line.text); // textContent only; the event itself is not mutated
     },
@@ -63,15 +65,19 @@ export function createCards(container) {
       const c = cards.get(mindId);
       if (!c) return;
       c.el.classList.remove('speaking');
-      if (cutOff) c.bubble.classList.add('cut');
+      motion.speaking(c.el, false);
+      if (cutOff) { c.bubble.classList.add('cut'); motion.jolt(c.el); }
     },
     /** Slow clap silence: all waveforms off and cards dimmed. */
     silence(on) {
       for (const c of cards.values()) {
         c.el.classList.toggle('dimmed', on);
-        if (on) c.el.classList.remove('speaking');
+        if (on) { c.el.classList.remove('speaking'); motion.speaking(c.el, false); }
       }
+      if (on) motion.slowClap([...cards.values()].map((c) => c.el));
     },
+    /** Tiles drop into the call one by one. */
+    join() { motion.joinCall([...cards.values()].map((c) => c.el)); },
     /** Rage quit: the card disconnects and stays disconnected until reset. */
     disconnect(mindId) {
       const c = cards.get(mindId);
@@ -79,6 +85,8 @@ export function createCards(container) {
       c.gone = true;
       c.el.classList.remove('speaking');
       c.el.classList.add('gone');
+      motion.speaking(c.el, false);
+      motion.disconnect(c.el);
       c.tagEl.textContent = 'Left';
       c.face.setMood('appalled', `${MINDS[mindId].short}: left the call`);
     },

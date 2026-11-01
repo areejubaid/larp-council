@@ -1,9 +1,9 @@
 # Root Render Blueprint for the Brain and the Hub. Free web services only.
 # The Voice Studio (part_a_voice) is not listed: it needs the ElevenLabs key and is run by the team.
-# Render names the public URLs after the service names (for example https://mind-council-brain.onrender.com).
+# Render names the public URLs after the service names (for example https://larp-council-brain.onrender.com).
 services:
   - type: web
-    name: mind-council-brain
+    name: larp-council-brain
     runtime: python
     plan: free
     rootDir: part-b-brain
@@ -32,7 +32,7 @@ services:
       - key: REPLAY_SPEED
         value: "1"
       # Team to set after the first deploy: the Brain's public URL ending in /run,
-      # for example https://mind-council-brain.onrender.com/run
+      # for example https://larp-council-brain.onrender.com/run
       - key: BRAIN_URL
         sync: false
       # Team to set: public https origin of the Voice Studio, no trailing slash. Unset means text only.

@@ -1,7 +1,9 @@
 // Mind Council UI bootstrap. Wires the form, the session stream, the presenter, the voice module and the panels.
 import { MINDS, MIND_IDS, mindName } from './constants.js';
 import { newSessionId, plain } from './text.js';
-import { h, reducedMotion } from './dom.js';
+import { h, reducedMotion, clear } from './dom.js';
+import { createFace } from './face.js';
+import * as motion from './motion.js';
 import { createCards } from './cards.js';
 import { createDashboard } from './dashboard.js';
 import { createPresenter } from './presenter.js';
@@ -52,6 +54,21 @@ const selectedMind = () => els.form.querySelector('input[name="mind"]:checked')?
 const syncMode = () => { els.mindPicker.hidden = selectedMode() !== 'larp'; };
 els.form.addEventListener('change', syncMode);
 syncMode();
+
+// Empty chairs on the setup screen: the council waiting to be pitched at.
+const seats = $('seats');
+if (seats) {
+  clear(seats);
+  for (const id of MIND_IDS) {
+    const face = createFace(id);
+    seats.append(h('li', { class: 'seat', 'data-mind': id, 'data-enter': '' },
+      h('div', { class: 'face' }, face.el),
+      h('span', { class: 'seat-name', text: MINDS[id].short }),
+      h('span', { class: 'seat-state', text: 'Waiting to join' })));
+    face.setMood(id === 'operator' ? 'skeptical' : id === 'engineer' ? 'sarcastic' : 'neutral', `${MINDS[id].short}, waiting`);
+  }
+}
+motion.enterSetup($('setup'));
 
 function setMsg(text, info = false) {
   els.msg.textContent = text;
@@ -141,6 +158,7 @@ async function begin({ mode, pitchText, call }) {
     dash.reset();
     els.setup.hidden = true;
     els.stage.hidden = false;
+    cards.join();
     els.demoBadge.hidden = true;
     els.silence.hidden = true;
     els.voiceStatus.hidden = true;
@@ -258,6 +276,7 @@ function restart() {
   els.silence.hidden = true;
   setMsg('');
   els.pitch.focus();
+  motion.enterSetup($('setup'));
 }
 
 // ---------- Event handling ----------
@@ -293,7 +312,7 @@ function onEnvelope(token, { seq, event }) {
 
 function presenterHandlers(token) {
   return {
-    onSilence: (on) => { cards.silence(on); els.silence.hidden = !on; },
+    onSilence: (on) => { cards.silence(on); els.silence.hidden = !on; if (on) motion.slowClap([], els.silence); },
     onLineStart: (line) => {
       if (line.mindId === token.player) return;
       els.voiceStatus.hidden = true;
@@ -313,6 +332,7 @@ function presenterHandlers(token) {
         // Audio mode: the player reports it after the line, while the claps play.
         cards.silence(true);
         els.silence.hidden = false;
+        motion.slowClap([], els.silence);
         const ms = audio ? 4500 : 2600 / (config.replaySpeed || 1);
         const t = setTimeout(() => { token.timers.delete(t); cards.silence(false); els.silence.hidden = true; }, ms);
         token.timers.add(t);
@@ -345,7 +365,8 @@ function showVerdict(token, v) {
   els.verdict.hidden = false;
   $('stage').inert = true;
   $('verdict-title').focus();
-  if (reducedMotion() || target === 0) {
+  const took = target !== 0 && !reducedMotion() && motion.revealVerdict(els.verdict.querySelector('.verdict-card'), els.vScore, target, () => sess !== token || els.verdict.hidden);
+  if (took) { /* GSAP is counting up */ } else if (reducedMotion() || target === 0) {
     els.vScore.textContent = String(target);
   } else {
     const start = performance.now();

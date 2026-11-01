@@ -13,8 +13,9 @@
 
   <header class="topbar">
     <div class="brand">
+      <span class="seal" aria-hidden="true"><i></i><i></i><i></i></span>
       <h1>Mind Council</h1>
-      <p class="tagline">Pitch your idea. A council of sarcastic AI minds judges it.</p>
+      <p class="tagline">Three sarcastic AI judges. One idea. No mercy.</p>
     </div>
     <p class="parody" role="note"><strong>AI parody.</strong> The minds are AI parodies of public thinking styles. They are not the real people, and nothing they say is a real quote.</p>
   </header>
@@ -22,7 +23,9 @@
   <main id="main">
     <section id="setup" aria-labelledby="setup-title">
       <h2 id="setup-title" class="sr-only">Set up your pitch</h2>
+
       <form id="pitch-form" novalidate>
+        <p class="form-kicker" aria-hidden="true">Your turn at the mic</p>
         <fieldset class="seg">
           <legend>Mode</legend>
           <div class="seg-row">
@@ -53,19 +56,28 @@
         <p id="mic-help" class="hint"></p>
       </form>
 
-      <div class="demos">
-        <h3>Nothing to pitch? Watch a demo</h3>
-        <div class="demo-row">
-          <button type="button" class="btn demo-btn" data-scenario="bad">Bad idea<span>interruptions and a rage quit</span></button>
-          <button type="button" class="btn demo-btn" data-scenario="good">Good idea<span>a grudging slow clap</span></button>
-          <button type="button" class="btn demo-btn" data-scenario="larp">LARP round<span>character consistency score</span></button>
+      <div class="setup-left">
+        <div class="hero">
+          <p class="eyebrow" data-enter>Live panel &middot; 3 judges &middot; 0 mercy</p>
+          <p class="hero-title" data-enter>Face the <em>council.</em></p>
+          <p class="hero-sub" data-enter>Pitch an idea out loud. Three AI minds judge it, cut each other off, and one of them may rage quit. Or LARP as one of them and get scored on how well you fake it.</p>
+        </div>
+        <ul id="seats" class="seats" aria-hidden="true"></ul>
+
+        <div class="demos" data-enter>
+          <h3>Nothing to pitch? Watch a demo</h3>
+          <div class="demo-row">
+            <button type="button" class="btn demo-btn" data-scenario="bad">Bad idea<span>interruptions and a rage quit</span></button>
+            <button type="button" class="btn demo-btn" data-scenario="good">Good idea<span>a grudging slow clap</span></button>
+            <button type="button" class="btn demo-btn" data-scenario="larp">LARP round<span>character consistency score</span></button>
+          </div>
         </div>
       </div>
     </section>
 
     <section id="stage" hidden aria-label="Council call">
       <div class="callbar">
-        <span id="conn" class="pill" data-state="connecting">Connecting</span>
+        <span class="rec" aria-hidden="true"></span><span id="conn" class="pill" data-state="connecting">Connecting</span>
         <span id="demo-badge" class="pill demo" hidden>Demo replay</span>
         <span id="voice-pill" class="pill" data-state="off">Text only</span>
         <span id="session-note" class="session-note"></span>
@@ -146,6 +158,7 @@
 
   <div id="sr-live" class="sr-only" aria-live="polite"></div>
 
+  <script src="/vendor/gsap.min.js"></script>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

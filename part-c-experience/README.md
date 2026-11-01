@@ -69,7 +69,7 @@ With only the hub running (`npm start`), the demo buttons and the typed-pitch fa
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `PORT` | `3000` | Port to listen on. Binds `0.0.0.0`. |
-| `BRAIN_URL` | unset | Full URL ending in `/run`, for example `https://mind-council-brain.onrender.com/run`. Unset means demo replay. |
+| `BRAIN_URL` | unset | Full URL ending in `/run`, for example `https://larp-council-brain.onrender.com/run`. Unset means demo replay. |
 | `BRAIN_TIMEOUT_MS` | `75000` | How long to wait for the Brain. Long on purpose: a free Render instance can take about a minute to wake up. |
 | `VOICE_URL` | unset | Origin of Part A's server, for example `https://mind-council-voice.onrender.com`. Unset means text only. |
 | `REPLAY_SPEED` | `1` | Speed multiplier for paced (non-voice) replays. The UI reads it from `/api/config` so its own pacing matches. |

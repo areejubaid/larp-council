@@ -41,11 +41,11 @@
 ## Access instructions
 * Run it locally: see RUN.md. No keys are needed for a mock run.
 * Live URL: TO FILL (hub URL after deploy)
-* Voice Studio URL: TO FILL (needed for live voices)
-* Repo URL: TO FILL
+* Voice Studio: runs on the presenter laptop during judging so the ElevenLabs key stays private (see RUN.md)
+* Repo URL: https://github.com/areejubaid/larp-council
 
 ## Judging criteria
-* Working Product: all three services run locally and on Render, with offline fallbacks so the demo does not depend on the network. Tests pass for the Brain and the Hub.
+* Working Product: all three services run locally, the Brain and Hub are set up for free Render deploys, with offline fallbacks so the demo does not depend on the network. Tests pass for the Brain and the Hub.
 * Usefulness: it is a safe, funny way to practise pitching and to learn how successful founders reason, with feedback on both the idea and the style.
 * Theme: LARP mode is the core. You play a founder's mind and get scored on how consistent you are.
 * Creativity: sarcastic AI minds that interrupt, blame, rage quit and slow clap, plus a Character Consistency Score and an Embarrassment Score.
