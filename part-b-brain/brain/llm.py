@@ -64,7 +64,7 @@ def extract_json(text: str):
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end <= start:
         raise ValueError("no JSON object in model output")
-    return json.loads(text[start:end + 1])
+    return json.loads(text[start:end + 1], strict=False)
 
 
 def _ask_anthropic(system: str, user: str, max_tokens: int) -> str:
@@ -159,7 +159,7 @@ def _featherless_text(system: str, user: str, max_tokens: int, timeout: float) -
     return data["choices"][0]["message"]["content"] or ""
 
 
-def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TIMEOUT_SECONDS, retries: int = 1):
+def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TIMEOUT_SECONDS, retries: int = 2):
     """Strict JSON from the active provider. Retries once on invalid JSON, then raises LLMError."""
     prov = provider()
     if prov == "offline":
@@ -171,6 +171,11 @@ def chat_json(system: str, user: str, max_tokens: int = 900, timeout: float = TI
         try:
             text = call(system, user if attempt == 0 else user + "\n\nReturn ONLY one valid JSON object, nothing else.",
                         max_tokens, timeout)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < retries:  # rate limited: wait a moment and try again
+                time.sleep(2)
+                continue
+            raise LLMError(f"{prov} call failed: {e!r}") from e
         except Exception as e:  # network, HTTP, SDK missing, bad payload shape
             raise LLMError(f"{prov} call failed: {e!r}") from e
         try:
