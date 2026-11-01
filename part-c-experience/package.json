@@ -1,0 +1,17 @@
+{
+  "name": "mind-council-experience",
+  "version": "1.0.0",
+  "description": "Mind Council Part C: event hub, replay demo mode, and live debate UI.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "ws": "8.22.1"
+  }
+}

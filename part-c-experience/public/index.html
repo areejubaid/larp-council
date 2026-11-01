@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Mind Council</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2244%22 fill=%22%230a090c%22 stroke=%22%23e6b04a%22 stroke-width=%228%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>Mind Council</h1>
+      <p class="tagline">Pitch your idea. A council of sarcastic AI minds judges it.</p>
+    </div>
+    <p class="parody" role="note"><strong>AI parody.</strong> The minds are AI parodies of public thinking styles. They are not the real people, and nothing they say is a real quote.</p>
+  </header>
+
+  <main id="main">
+    <section id="setup" aria-labelledby="setup-title">
+      <h2 id="setup-title" class="sr-only">Set up your pitch</h2>
+      <form id="pitch-form" novalidate>
+        <fieldset class="seg">
+          <legend>Mode</legend>
+          <div class="seg-row">
+            <input type="radio" name="mode" id="mode-roast" value="roast" checked>
+            <label for="mode-roast"><span class="seg-title">Roast</span><span class="seg-sub">Pitch as yourself</span></label>
+            <input type="radio" name="mode" id="mode-larp" value="larp">
+            <label for="mode-larp"><span class="seg-title">LARP</span><span class="seg-sub">Pitch as a mind</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="seg" id="mind-picker" hidden>
+          <legend>Pitch as which mind?</legend>
+          <div class="seg-row" id="mind-picker-row"></div>
+        </fieldset>
+
+        <div class="field">
+          <label for="pitch">Your pitch</label>
+          <textarea id="pitch" rows="5" maxlength="2000" placeholder="An app that tells you which of your houseplants is judging you..." aria-describedby="form-msg"></textarea>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="submit-btn">Judge my idea</button>
+          <button type="button" class="btn" id="mic-btn" aria-describedby="form-msg">
+            <span class="mic-dot" aria-hidden="true"></span><span class="mic-label">Speak your pitch</span>
+          </button>
+        </div>
+        <p id="form-msg" class="msg" role="status" aria-live="polite"></p>
+        <p id="mic-help" class="hint"></p>
+      </form>
+
+      <div class="demos">
+        <h3>Nothing to pitch? Watch a demo</h3>
+        <div class="demo-row">
+          <button type="button" class="btn demo-btn" data-scenario="bad">Bad idea<span>interruptions and a rage quit</span></button>
+          <button type="button" class="btn demo-btn" data-scenario="good">Good idea<span>a grudging slow clap</span></button>
+          <button type="button" class="btn demo-btn" data-scenario="larp">LARP round<span>character consistency score</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="stage" hidden aria-label="Council call">
+      <div class="callbar">
+        <span id="conn" class="pill" data-state="connecting">Connecting</span>
+        <span id="demo-badge" class="pill demo" hidden>Demo replay</span>
+        <span id="voice-pill" class="pill" data-state="off">Text only</span>
+        <span id="session-note" class="session-note"></span>
+        <button type="button" class="btn small" id="restart-top">Start over</button>
+      </div>
+      <p id="pitch-echo" class="pitch-echo" hidden></p>
+
+      <div id="deliberating" class="banner" role="status" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <div><strong>The council is deliberating...</strong>
+          <p id="deliberating-more" class="hint" hidden>The Brain may be waking up. A cold start can take up to a minute.</p></div>
+      </div>
+      <div id="voice-status" class="banner" role="status" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <div><strong id="voice-status-text">Warming up voices...</strong></div>
+      </div>
+
+      <div id="silence" class="silence" role="status" hidden>
+        <span class="silence-text">Silence in the room.</span>
+        <span class="claps" aria-hidden="true"><i></i><i></i><i></i></span>
+      </div>
+
+      <div id="cards" class="cards"></div>
+
+      <div class="dash">
+        <section class="panel" aria-labelledby="h-meters">
+          <h2 id="h-meters">Disappointment</h2>
+          <div id="meters" class="meters"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-idea">
+          <h2 id="h-idea">Idea score</h2>
+          <div id="idea" class="idea"><p class="empty">Waiting for the scorer.</p></div>
+        </section>
+
+        <section class="panel" id="char-panel" aria-labelledby="h-char" hidden>
+          <h2 id="h-char">Character Consistency</h2>
+          <div class="meter" id="char-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="h-char">
+            <div class="meter-track"><div class="meter-fill"></div></div>
+            <span class="meter-num" id="char-num">pending</span>
+          </div>
+          <p class="hint" id="char-hint">How well you sounded like the mind you picked.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="h-int">
+          <h2 id="h-int">Interruptions</h2>
+          <ol id="interruptions" class="log"><li class="empty">Nobody has been rude yet.</li></ol>
+        </section>
+
+        <section class="panel wide" aria-labelledby="h-trace">
+          <h2 id="h-trace">Principle trace</h2>
+          <ol id="trace" class="log trace"><li class="empty">Each line will show the principle it came from.</li></ol>
+        </section>
+
+        <section class="panel wide" aria-labelledby="h-feed">
+          <h2 id="h-feed">Live event feed</h2>
+          <ol id="feed" class="log feed" tabindex="0" aria-label="Live event feed, newest first"></ol>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div id="verdict" class="overlay" role="dialog" aria-modal="true" aria-labelledby="verdict-title" hidden>
+    <div class="verdict-card">
+      <h2 id="verdict-title" tabindex="-1">The verdict is in</h2>
+      <p class="score-label">Embarrassment Score</p>
+      <p class="big-score"><span id="v-score">0</span><span class="of">/100</span></p>
+      <p id="v-char" class="v-char" hidden></p>
+      <p id="v-summary" class="v-summary"></p>
+      <blockquote id="v-roast" class="v-roast"></blockquote>
+      <p id="v-demo" class="hint" hidden>This was a demo replay, so the score is canned.</p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="restart-btn">Start over</button>
+        <button type="button" class="btn" id="close-verdict">Back to the call</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sr-live" class="sr-only" aria-live="polite"></div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
