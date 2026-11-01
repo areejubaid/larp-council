@@ -124,7 +124,7 @@ T = {
         "challenge": {
             "startup": [
                 "That's vague. {Ap} sounds good, but what's the actual number? Cost, time, anything.",
-                "Okay, but {ap} is hand waving. What's the physics of it?",
+                "Okay, but {ap} is hand waving. What is the hardest constraint that decides if it works?",
             ],
             "life": [
                 "That's vague. What's the real goal behind {ap}?",

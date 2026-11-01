@@ -558,7 +558,11 @@ async function startMic() {
   state.mic.active = false;
   tiles.get('user')?.classList.remove('listening');
   setPersonState('user', 'Mic ready', false);
-  if (state.ended || state.mic.discard) return;
+  if (state.ended) return;
+  if (state.mic.discard) {
+    if (state.awaiting) setStatus('Mic is off. Type your answer and press Send.');
+    return;
+  }
   if (/not-allowed|denied|service-not-allowed/.test(failed)) {
     toast('Microphone is blocked. Allow it in your browser, or type your answer.');
     state.mic.enabled = false; paintMicButton();

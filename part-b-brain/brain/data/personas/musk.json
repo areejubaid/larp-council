@@ -15,7 +15,7 @@
     "Actively look for negative feedback and what is wrong with your idea, and accept a high chance of failure on something important."
   ],
   "typicalQuestions": [
-    "What is the physics of this, what is the fundamental limit?",
+    "What is the one hard constraint that decides whether this works, like cost, time or supply?",
     "Why is it not ten times cheaper or faster already?",
     "What is the hardest part, the one that could kill it?",
     "What is the biggest assumption you have not tested?",

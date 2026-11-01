@@ -193,6 +193,7 @@ def build_system_prompt(persona_ids):
         "habits and typical questions in the profile below, applied to this user's specific idea. Do not give generic "
         "advice that any persona could say. For each turn set \"basis\" to a short phrase (under 12 words) naming the "
         "principle or public source it rests on, for example \"focus means saying no (Stanford talk, 2005)\".\n\n"
+        "PLAIN LANGUAGE: the user must understand every question the first time they hear it. Ask in simple everyday words about THEIR idea, name the specific thing you mean, and never use jargon or a persona catchphrase on its own (for example never just ask \"what is the physics of this\"; say what limit or cost you mean instead).\n\n"
         "ONE QUESTION RULE: a round has at most ONE question for the user, asked by the final turn only. Any earlier "
         "turn is a short reaction that agrees or disagrees (with the user or with another persona) and contains no "
         "question mark.\n\n"
