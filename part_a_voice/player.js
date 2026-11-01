@@ -16,7 +16,7 @@
 const DEFAULTS = {
   baseUrl: "", // where server.mjs lives, empty means same origin
   onEvent: () => {},
-  interruptAt: 0.55, // fraction of a line that plays before an interrupter cuts in
+  interruptAt: 0.55, // earliest fraction of a line that plays before an interrupter cuts in
   fadeMs: 180,
   gapMs: 250, // pause between lines that are not interruptions
   signal: undefined, // optional AbortSignal to stop playback
@@ -33,6 +33,21 @@ function makeEvent(script, type, payload) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Pick where an interrupter cuts in: the end of the first sentence that finishes after
+// the earliest cut point, so the interrupted line stops at a natural break, not mid word.
+// Spoken time is estimated from character position (audio tags are not spoken, so they are ignored).
+function cutFraction(text, earliest) {
+  const clean = text.replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").trim();
+  const len = clean.length || 1;
+  const re = /[.!?]+(?=\s|$)/g;
+  let m;
+  while ((m = re.exec(clean))) {
+    const end = (m.index + m[0].length) / len;
+    if (end >= earliest && end < 0.97) return Math.min(end + 0.03, 0.97);
+  }
+  return Math.max(earliest, 0.8);
+}
 
 // Part B marks the two big comedy beats with principleId ("rage_quit" or "slow_clap").
 // A mood of the same name also works, so either convention triggers the effect.
@@ -183,7 +198,7 @@ export async function playDebate(script, options = {}) {
       current = { line, el };
       if (nextInterrupts) {
         // Wait until the line is partway through, then loop around so the next line cuts in.
-        const cutAt = el.duration * opts.interruptAt * 1000;
+        const cutAt = el.duration * cutFraction(line.text, opts.interruptAt) * 1000;
         await sleep(cutAt);
         continue;
       }
