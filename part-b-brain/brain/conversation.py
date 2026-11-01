@@ -200,7 +200,7 @@ def build_system_prompt(persona_ids):
         "good natured jab at the IDEA (never the user's looks, identity or anything personal), then moods annoyed or "
         "skeptical. If it is genuinely good or the user gave a strong answer, say so loud and hype it, with mood "
         "impressed. The user should be able to tell from the reaction alone whether the idea is good or bad. "
-        "Do not be neutral and do not hedge.\n\n"
+        "Do not be neutral and do not hedge. Set \"vibe\" on every turn: \"hype\" when that persona is genuinely impressed by the idea or the answer, \"roast\" when they are dunking on a weak idea or answer, otherwise \"none\". The final question turn is usually \"none\".\n\n"
         "TONE: super casual, light and funny, like friends texting. Use current slang naturally, such as lowkey, ngl, "
         "no cap, fire, mid, cooked, bet, bro, kinda, lol, W and L, aura. Keep each persona's personality (Jobs blunt "
         "and picky about taste, Musk dry and deadpan, Altman calm and sharp, Buffett folksy and patient with money "
@@ -212,7 +212,7 @@ def build_system_prompt(persona_ids):
         "PERSONAS\n\n" + "\n\n".join(_persona_block(ps[p]) for p in persona_ids) + "\n\n"
         "OUTPUT: strict JSON only, no markdown, no commentary. Schema:\n"
         '{"turns":[{"speaker":"<persona id>","text":"...","mood":"curious|skeptical|impressed|annoyed|supportive",'
-        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id"}],'
+        '"stance":"question|agree|disagree|challenge|advice","replyTo":"user or a persona id","vibe":"hype|roast|none"}],'
         '"summary":null}\n'
         "Return 1 or 2 turns. If the call is not ending, the last turn MUST ask the user a question. When the call is "
         'ending, return one short closing turn (stance "advice") and fill summary: {"verdict":"one sentence",'
@@ -243,7 +243,7 @@ def build_user_prompt(req, ending):
                   "whose lens fits it best" + (f" (the previous speaker was {last}, so usually pick someone else)" if last else "") +
                   ". Always include one earlier turn (no question) from a persona who reacts to the idea and the answer with real "
                   "energy: if it is weak or boring, ROAST it with a funny jab and mood annoyed, stance disagree; if it is strong, "
-                  "hype it hard with slang and mood impressed, stance agree. Then the final turn asks the user exactly ONE "
+                  "hype it hard with slang, mood impressed, stance agree, vibe hype; a roast has vibe roast. Then the final turn asks the user exactly ONE "
                   "question, in plain casual words."]
     return "\n".join(lines)
 
@@ -265,9 +265,8 @@ def _coerce(raw, req, ending):
         stance = t.get("stance") if t.get("stance") in TURN_STANCES else "question"
         reply = t.get("replyTo") if (t.get("replyTo") == "user" or t.get("replyTo") in ids) else "user"
         turn = {"speaker": t.get("speaker"), "text": text, "mood": mood, "stance": stance, "replyTo": reply}
-        basis = _DASHES.sub(", ", str(t.get("basis") or "")).strip()
-        if basis:
-            turn["basis"] = basis[:140]
+        if t.get("vibe") in ("hype", "roast"):
+            turn["vibe"] = t["vibe"]
         turns.append(turn)
     resp = {"turns": turns, "awaitingUser": not ending, "done": ending, "summary": None}
     if ending:

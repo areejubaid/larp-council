@@ -1,6 +1,7 @@
 // LARP Council: call UI. Landing, call loop, summary.
 // Talks only to the hub (/api/personas, /api/turn, /api/config) and Part A's voice module via ../voice.js.
 import { initVoice, isVoiceAvailable, playDebate, transcribePitch, stopVoice, unlockAudio } from '/js/voice.js';
+import { playSfx, unlockSfx } from './sfx.js';
 import { stripAudioTags, readingMs, initials, textOn, safeColor, truncate, formatClock, buildTurnScript, summaryToText } from './util.js';
 
 const $ = (id) => document.getElementById(id);
@@ -253,20 +254,26 @@ function setCaption(speakerName, text, color, tag = '') {
   body.classList.toggle('empty', !text);
   animate((g) => g.fromTo(body, { opacity: 0.2, y: 6 }, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', clearProps: 'transform,opacity' }));
 }
-/* LARP reactions: a floating tag on the speaker's tile when they are impressed or roast the idea. */
-const HYPE_TAGS = ['+1 Aura', '+1 W', '+1 Respect', '+1 Rizz'];
-const ROAST_TAGS = ['Roasted', 'Cooked', 'Big L', 'Mid'];
-function reactionPopup(speakerId, mood) {
+/* LARP reactions: a floating aura tag and a short sound when someone is impressed or roasts the idea. */
+const HYPE_TAGS = ['+1 Aura', '+10 Aura', '+1 W', '+1 Rizz', '+100 Aura'];
+const ROAST_TAGS = ['-1 Aura', '-10 Aura', '-50 Aura', 'Negative Aura', '-100 Aura'];
+function vibeOf(turn) {
+  if (turn.vibe === 'hype' || turn.vibe === 'roast') return turn.vibe;
+  if (turn.mood === 'impressed') return 'hype';
+  if (turn.mood === 'annoyed') return 'roast';
+  return '';
+}
+/** Shows the tag and plays a sound. Returns how long the sound lasts so the caller can wait before the next voice. */
+function reactionPopup(speakerId, vibe) {
   const tile = tiles.get(speakerId);
-  if (!tile || (mood !== 'impressed' && mood !== 'annoyed')) return;
-  const hype = mood === 'impressed';
+  if (!tile || !vibe) return 0;
+  const hype = vibe === 'hype';
   const pool = hype ? HYPE_TAGS : ROAST_TAGS;
-  const tag = el('div', 'react ' + (hype ? 'react-hype' : 'react-roast'), (hype ? '' : '\uD83D\uDD25 ') + pool[Math.floor(Math.random() * pool.length)]);
+  const tag = el('div', 'react ' + (hype ? 'react-hype' : 'react-roast'), (hype ? '\u2728 ' : '\uD83D\uDC80 ') + pool[Math.floor(Math.random() * pool.length)]);
   tag.setAttribute('aria-hidden', 'true');
   tile.appendChild(tag);
-  setTimeout(() => tag.remove(), 2600);
-  const live = $('captions-status');
-  if (live && hype) live.setAttribute('data-react', speakerId);
+  setTimeout(() => tag.remove(), 2800);
+  return playSfx(vibe);
 }
 function setStatus(text) { $('captions-status').textContent = text; }
 function clearCaption() { $('cap-speaker').textContent = ''; $('cap-text').textContent = ''; $('captions').classList.add('empty'); }
@@ -438,7 +445,6 @@ async function presentTurn(turn, ctl) {
     setSpeaker(speaker);
     setCaption(p?.name ?? speaker, clean, safeColor(p?.color), '');
     setStatus('');
-    reactionPopup(speaker, turn.mood);
     addChat(speaker, text, turn);
   };
   if (ctl.signal.aborted) { showNow(); setSpeaker(null); return; } // user cut in: log it, no audio
@@ -461,6 +467,11 @@ async function presentTurn(turn, ctl) {
   }
   showNow();
   if (!played && !ctl.signal.aborted) await sleep(readingMs(text), ctl.signal);
+  // The reaction lands after the line ends, so the sound never talks over a voice.
+  if (!ctl.signal.aborted) {
+    const ms = reactionPopup(speaker, vibeOf(turn));
+    if (ms) await sleep(ms + 150, ctl.signal);
+  }
   if (!ctl.signal.aborted) await sleep(250, ctl.signal);
 }
 
@@ -666,6 +677,7 @@ function startCall() {
   setIdeaError('');
   if (state.selected.size < 2) return;
   unlockAudio();
+  unlockSfx();
   resetCall();
   state.idea = idea;
   state.sessionId = newSessionId();
