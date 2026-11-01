@@ -171,7 +171,7 @@ def _persona_block(p):
     return (
         f"ID: {p['id']}\nName: {p['name']} ({p['role']})\nLens: {p['lens']}\n"
         "Thinking principles (paraphrased from public material):\n" + "\n".join(f"- {x}" for x in p["principles"]) + "\n"
-        "Questions they tend to ask:\n" + "\n".join(f"- {x}" for x in p["typicalQuestions"]) + "\n"
+        "Themes they like to probe (examples of the KIND of question, never copy them word for word):\n" + "\n".join(f"- {x}" for x in p["typicalQuestions"]) + "\n"
         f"Speaking style: {p['speakingStyle']}\nImpressed by: {p['impresses']}\nAnnoyed by: {p['annoys']}\n"
         f"Startups vs life decisions: {p['lifeVsStartup']}"
     )
@@ -223,6 +223,37 @@ def build_system_prompt(persona_ids):
     )
 
 
+_LENS_ANGLES = {
+    "jobs": "who it is really for, how it should feel to use, what to cut or say no to",
+    "musk": "the hardest constraint, or the boldest and fastest way to make it real",
+    "altman": "growth: the first users, why now, how fast the user can learn from real people",
+    "buffett": "money: how it earns, what protects it, whether it still works in ten years",
+}
+
+
+def _asked_questions(history):
+    out = []
+    for h in history:
+        if h["speaker"] == "user":
+            continue
+        out += [x.strip() for x in re.findall(r"[^.!?]*\?", h["text"]) if x.strip()]
+    return out
+
+
+def _plan_round(req):
+    """Rotate who asks and who reacts so the call moves around the table instead of looping on one voice."""
+    ids = req["personas"]
+    spoke = [h["speaker"] for h in req["history"] if h["speaker"] != "user"]
+    counts = {p: spoke.count(p) for p in ids}
+    recent = spoke[-2:]
+    pool = [p for p in ids if p not in recent] or ids
+    asker = min(pool, key=lambda p: (counts[p], ids.index(p)))
+    others = [p for p in ids if p != asker]
+    last = spoke[-1] if spoke else None
+    reactor = last if last in others else (others[0] if others else asker)
+    return asker, reactor, last
+
+
 def build_user_prompt(req, ending):
     ctx = classify_idea(req["idea"])
     lines = [f"Idea: {req['idea']}", f"Looks like a: {'life decision' if ctx == 'life' else 'startup or project'}",
@@ -236,15 +267,29 @@ def build_user_prompt(req, ending):
     if ending:
         lines += ["", "The call is ending now. Return a short closing turn and the full summary."]
     elif n == 0:
-        lines += ["", "This is the start. One persona whose lens fits best opens with ONE question specific to this idea. Return exactly 1 turn."]
+        lines += ["", "This is the start. One persona whose lens fits best opens with ONE question about the single biggest "
+                  "unknown in THIS particular idea, in plain casual words, like a person who just heard the pitch and is "
+                  "curious. Not a stock question. Return exactly 1 turn."]
     else:
-        last = next((h["speaker"] for h in reversed(req["history"]) if h["speaker"] != "user"), None)
-        lines += ["", f"The user has given {n} answer(s). React to their latest answer specifically. Pick the persona "
-                  "whose lens fits it best" + (f" (the previous speaker was {last}, so usually pick someone else)" if last else "") +
-                  ". Always include one earlier turn (no question) from a persona who reacts to the idea and the answer with real "
-                  "energy: if it is weak or boring, ROAST it with a funny jab and mood annoyed, stance disagree; if it is strong, "
-                  "hype it hard with slang, mood impressed, stance agree, vibe hype; a roast has vibe roast. Then the final turn asks the user exactly ONE "
-                  "question, in plain casual words."]
+        asker, reactor, last = _plan_round(req)
+        asked = _asked_questions(req["history"])
+        ps = load_personas()
+        lines += ["", f"The user has given {n} answer(s). This is a real conversation, not an interview script. "
+                  "Plan for this round:",
+                  f"1. REACTION turn from {reactor} (no question mark): respond to what the user JUST said by using a few of "
+                  "their actual words, then give an honest take with a real opinion, 1 to 2 punchy sentences. "
+                  + (f"If {reactor} sees it differently from what {last} said earlier, say so and call {last} out by first name; "
+                     "if they agree, build on it with something new. " if last and last != reactor else "")
+                  + "Weak or boring answer: ROAST it with a funny jab, mood annoyed, stance disagree, vibe roast. "
+                  "Strong answer: hype it hard in slang, mood impressed, stance agree, vibe hype.",
+                  f"2. QUESTION turn from {asker} (exactly ONE question): ask it from {asker}'s angle ({_LENS_ANGLES.get(asker, ps[asker]['lens'])}), "
+                  "but it MUST grow out of a specific detail in the user's latest answer, like someone actually listening and "
+                  f"digging in. You may start by jumping in on what {reactor} just said (agree, push back or tease them) "
+                  "before asking. Move to a NEW topic or go deeper than before, never circle back."]
+        if asked:
+            lines += ["", "Questions already asked on this call. Do NOT repeat, reword or revisit any of them:"] + [f"- {q}" for q in asked]
+        lines += ["", "Keep the voices clearly different from each other and do not begin the lines with the same words as "
+                  "earlier lines. Return exactly 2 turns in that order."]
     return "\n".join(lines)
 
 

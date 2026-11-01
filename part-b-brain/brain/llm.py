@@ -144,7 +144,9 @@ def _featherless_text(system: str, user: str, max_tokens: int, timeout: float) -
         "model": os.environ.get("FEATHERLESS_MODEL", DEFAULT_FEATHERLESS_MODEL),
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         "max_tokens": max_tokens,
-        "temperature": 0.6,
+        "temperature": 0.7,
+        "presence_penalty": 0.5,
+        "frequency_penalty": 0.3,
     }).encode()
     req = urllib.request.Request(
         os.environ.get("FEATHERLESS_BASE_URL", FEATHERLESS_URL).rstrip("/") + "/chat/completions", data=body, method="POST",
