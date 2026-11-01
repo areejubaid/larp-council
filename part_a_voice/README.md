@@ -42,7 +42,8 @@ Events emitted (contract Event shape): line_ready, audio_started, interruption, 
 * [x] Renderer, cache and offline fallback (server cache, then browser voice)
 * [x] Interruptions, rage quit and slow clap tested in mock mode
 * [x] Council Perfectionist designed and saved on the ElevenLabs website (run link_voices.mjs to record its id)
-* [ ] Engineer and Operator voices designed
+* [x] Council Engineer and Council Operator designed and saved on the ElevenLabs website
+* [ ] Run link_voices.mjs so voices.json has all three ids
 * [ ] Each mind distinguishable by ear
 * [ ] Sarcasm audible on at least 3 lines (tune audio tags)
 * [ ] Cache warmed for demo lines
