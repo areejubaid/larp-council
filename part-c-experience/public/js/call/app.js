@@ -238,7 +238,7 @@ const STANCES = { agrees: 'Agrees', agree: 'Agrees', disagrees: 'Disagrees', dis
 function stanceLabel(st) { return STANCES[String(st ?? '').toLowerCase().trim()] || ''; }
 function replyLabel(turn) {
   const to = turn?.replyTo;
-  if (!to || typeof to !== 'string' || to === turn.speaker) return '';
+  if (!to || typeof to !== 'string' || to === 'user' || to === turn.speaker || !personaById(to)) return '';
   return 'replying to ' + nameOf(to);
 }
 function setCaption(speakerName, text, color, tag = '') {
