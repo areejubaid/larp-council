@@ -36,14 +36,44 @@ Unit tests: `python -m unittest discover -s tests -t .`
 
 Every Claude call falls back to the offline script on error, so the demo never depends on the network.
 
-## Deploy on Render Workflows
+## Deploy on Render (free Web Service)
+
+`server.py` is a small HTTP server (standard library only):
+
+- `GET /health` returns `{"ok": true, "llm": <bool>}`
+- `POST /run` takes a `PitchInput` and returns `{"script": <DebateScript>, "events": [<Event>, ...]}`. Bad input gets a 400. CORS is open so the browser frontend can call it directly.
+
+In Render choose **New → Web Service**, connect this repo, then:
+
+| Field | Value |
+| --- | --- |
+| Branch | `main` |
+| Language | Python 3 |
+| Root Directory | `part-b-brain` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `python server.py` |
+| Instance type | Free |
+| Env vars | `ANTHROPIC_API_KEY` (optional, offline scripts are used without it), `EVENT_HUB_URL` (optional) |
+
+Test it (replace the URL with yours):
+
+```
+curl https://YOUR-SERVICE.onrender.com/health
+curl -X POST https://YOUR-SERVICE.onrender.com/run -H "Content-Type: application/json" -d "{\"sessionId\":\"s1\",\"mode\":\"roast\",\"pitchText\":\"Uber for toasters on the blockchain but with AI.\"}"
+```
+
+Free web services sleep when idle, so the first request can take a while. Open `/health` a few minutes before a demo to wake it.
+
+## Render Workflows (optional, paid)
+
+Not used for the free deploy. Install with `pip install -r requirements-workflow.txt`.
 
 Written against `render` 1.6.0 on PyPI (`render_sdk` is only a shim that installs it). Render Workflows is in beta, so the API may change.
 
 In the Render dashboard, create a **Workflow** service from this repo:
 
 - Root directory: `part-b-brain`
-- Build command: `pip install -r requirements.txt`
+- Build command: `pip install -r requirements-workflow.txt`
 - Start command: `render-workflows workflow_app:app`
 - Environment variables: `ANTHROPIC_API_KEY`, optional `EVENT_HUB_URL` (Part C's hub)
 
