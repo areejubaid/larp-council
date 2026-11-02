@@ -351,3 +351,9 @@ button, input, textarea { font: inherit; color: inherit; }
 .aura-sub { color: var(--muted); margin-top: 4px; font-size: .9375rem; text-wrap: pretty; }
 .score-word { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; font-size: .8125rem; font-weight: 750; background: color-mix(in srgb, var(--w, var(--muted)) 20%, transparent); color: var(--w, var(--muted)); width: fit-content; }
 @media (max-width: 480px) { .aura-card { flex-direction: column; align-items: flex-start; gap: 8px; } }
+
+/* Final page: workable call + each persona's plan */
+.workable { display: inline-block; width: fit-content; padding: 4px 12px; border-radius: 999px; font-size: .875rem; font-weight: 800; background: color-mix(in srgb, var(--w) 18%, transparent); color: var(--w); border: 1px solid color-mix(in srgb, var(--w) 45%, transparent); }
+.take-plan { margin-top: 2px; padding: 12px 14px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--c) 10%, var(--bg)); border-left: 4px solid var(--c); display: grid; gap: 4px; }
+.take-plan-label { font-size: .8125rem; font-weight: 800; letter-spacing: .02em; color: var(--c); }
+.take-plan-text { margin: 0; text-wrap: pretty; }

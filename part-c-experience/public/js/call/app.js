@@ -630,6 +630,11 @@ const AURA_TIERS = [
 const SCORE_WORDS = [
   [2, 'cooked', '#ff4d5a'], [4, 'mid', '#ff8a65'], [6, 'not bad', '#ffd166'], [8, 'solid W', '#c8f169'], [10, 'goated', '#7dffb2'],
 ];
+const WORKABLE = {
+  yes: { label: '\u2705 workable', color: '#7dffb2' },
+  maybe: { label: '\uD83E\uDD14 maybe workable', color: '#ffd166' },
+  no: { label: '\u274C not workable (yet)', color: '#ff6b6b' },
+};
 function scoreWord(score) {
   const n = Number(score);
   if (!Number.isFinite(n)) return null;
@@ -651,6 +656,7 @@ function paintAura(perPersona) {
 
 /* ---------------- summary ---------------- */
 function showSummary(summary) {
+  document.querySelectorAll('.aura-pop, .aura-flash').forEach((e) => e.remove()); // no popup over the final page
   clearInterval(state.timerId);
   stopVoice();
   const s = summary && typeof summary === 'object' ? summary : { verdict: 'The call has ended.', perPersona: [], nextSteps: [] };
@@ -673,6 +679,17 @@ function showSummary(summary) {
     score.setAttribute('aria-label', `Score ${pp.score ?? 'none'} out of 10`);
     head.append(av, nm, score);
     li.append(head, el('p', 'take-text', pp.take || ''));
+    const wk = WORKABLE[pp.workable];
+    if (wk) {
+      const chip = el('span', 'workable workable-' + pp.workable, wk.label);
+      chip.style.setProperty('--w', wk.color);
+      li.insertBefore(chip, li.querySelector('.take-text'));
+    }
+    if (pp.plan) {
+      const plan = el('div', 'take-plan');
+      plan.append(el('div', 'take-plan-label', "how i'd make it win"), el('p', 'take-plan-text', pp.plan));
+      li.append(plan);
+    }
     takes.appendChild(li);
   });
   if (!(s.perPersona ?? []).length) takes.appendChild(el('li', 'state', 'the council said nothing. suspicious.'));

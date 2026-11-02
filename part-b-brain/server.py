@@ -59,6 +59,7 @@ class Handler(BaseHTTPRequestHandler):
             script = run(pitch_input, emitter)
             self._send(200, {"script": script, "events": emitter.events})
         except (ValueError, json.JSONDecodeError) as e:  # bad input, including contract violations
+            print(f"{self.path} 400: {e}", flush=True)
             self._send(400, {"error": str(e)})
         except Exception as e:  # never leak a stack trace to the browser
             print(f"{self.path} failed: {e!r}", flush=True)

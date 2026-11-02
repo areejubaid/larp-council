@@ -86,7 +86,10 @@ export function buildTurnScript(turn, sessionId, idx = 0) {
 /** Summary text for the clipboard. */
 export function summaryToText(idea, summary, nameOf = (id) => id) {
   const lines = ['LARP Council receipts', `Idea: ${idea}`, '', `Verdict: ${summary.verdict ?? ''}`, ''];
-  for (const p of summary.perPersona ?? []) lines.push(`${nameOf(p.speaker)} (${p.score}/10): ${p.take}`);
+  for (const p of summary.perPersona ?? []) {
+    lines.push(`${nameOf(p.speaker)} (${p.score}/10${p.workable ? `, ${p.workable === 'yes' ? 'workable' : p.workable === 'no' ? 'not workable' : 'maybe workable'}` : ''}): ${p.take}`);
+    if (p.plan) lines.push(`  how they'd make it win: ${p.plan}`);
+  }
   if (summary.nextSteps?.length) {
     lines.push('', 'Side quests:');
     summary.nextSteps.forEach((s, i) => lines.push(`${i + 1}. ${s}`));

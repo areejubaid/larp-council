@@ -232,8 +232,15 @@ def build_system_prompt(persona_ids):
         '"summary":null}\n'
         "Return 1 or 2 turns. If the call is not ending, the last turn MUST ask the user a question. When the call is "
         'ending, return one short closing turn (stance "advice") and fill summary: {"verdict":"one sentence",'
-        '"perPersona":[{"speaker":"<id>","take":"two sentences","score":<integer 1 to 10>}],"nextSteps":["...","...","..."]} '
-        "with exactly one perPersona entry per persona listed above and exactly 3 short nextSteps. Write the verdict, "
+        '"perPersona":[{"speaker":"<id>","take":"two sentences","score":<integer 1 to 10>,"workable":"yes|maybe|no",'
+        '"plan":"two sentences"}],"nextSteps":["...","...","..."]} '
+        "with exactly one perPersona entry per persona listed above and exactly 3 short nextSteps. For each persona, "
+        "\"workable\" is their honest call on whether this idea can actually work from THEIR point of view (yes, maybe "
+        "or no, and it must agree with their score: 7 or more yes, 4 to 6 maybe, 3 or less no), and \"plan\" is how THEY "
+        "personally would take this exact idea and turn it into a success, two concrete sentences in their own voice "
+        "and lens (their own moves, priorities and first steps for this idea, referencing what the user said). The four "
+        "plans must be clearly different from each other and must not repeat the nextSteps. Even for a no, the plan says "
+        "what they would change to make it work. Write the verdict, "
         "takes and nextSteps in a dry, deadpan, self-aware hackathon humor, like a group chat roasting itself: "
         "lowercase is fine, short punchy lines, jokes like impressively fake, cant center a div, aura, cooked, mid, "
         "npc, main character (invent fresh ones, do not copy these). The verdict is one funny sentence. Each take is "
@@ -367,7 +374,15 @@ def _coerce(raw, req, ending):
                     score = max(1, min(10, int(round(float(score)))))
                 except (TypeError, ValueError):
                     score = 5
-                per.append({"speaker": p.get("speaker"), "take": _DASHES.sub(", ", str(p.get("take", ""))), "score": score})
+                workable = str(p.get("workable", "")).strip().lower()
+                if workable not in ("yes", "maybe", "no"):
+                    workable = "yes" if score >= 7 else ("maybe" if score >= 4 else "no")
+                entry = {"speaker": p.get("speaker"), "take": _DASHES.sub(", ", str(p.get("take", ""))), "score": score,
+                         "workable": workable}
+                plan = _soften(_DASHES.sub(", ", str(p.get("plan") or "")).strip())
+                if plan:
+                    entry["plan"] = plan
+                per.append(entry)
         have = {p["speaker"] for p in per}
         if any(pid not in have for pid in ids):
             raise ValueError("summary must cover every persona")
@@ -407,7 +422,7 @@ def _one_question(resp):
 
 def _llm_turns(req, ending):
     raw = llm.chat_json(build_system_prompt(req["personas"]), build_user_prompt(req, ending),
-                        max_tokens=1200 if ending else 600)
+                        max_tokens=1800 if ending else 600)
     resp = _coerce(raw, req, ending)
     validate_turn_response(resp, req["personas"])
     return resp
