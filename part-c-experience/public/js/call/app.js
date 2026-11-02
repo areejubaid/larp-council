@@ -21,6 +21,7 @@ const state = {
   pending: [],
   awaiting: false,
   ended: false,
+  ending: false,
   speakerId: null,
   playCtl: null,      // AbortController for the current persona audio
   generation: 0,      // bumped when the call is left, so late async work is dropped
@@ -362,7 +363,7 @@ function startTimer() {
 function setRequesting(on) {
   state.requesting = on;
   $('send-btn').disabled = on;
-  $('wrap-btn').disabled = on || state.ended;
+  $('wrap-btn').disabled = state.ended || state.ending; // Wrap up works any time, even while the council is thinking or talking
   $('mic-btn').disabled = on && !state.mic.active;
 }
 
@@ -401,6 +402,7 @@ async function runTurn(endCall) {
     data = await postTurn(endCall);
   } catch (err) {
     if (stale()) return;
+    if (endCall) state.ending = false; // let Wrap up be pressed again
     setThinking(false);
     setRequesting(false);
     setStatus('Connection problem');
@@ -415,6 +417,8 @@ async function runTurn(endCall) {
   state.playCtl = new AbortController();
   const ctl = state.playCtl;
   state.pending = [...data.turns];
+  // Wrap up pressed by the user: skip the spoken closing line and go straight to the final page.
+  if (data.done && state.ending) state.pending = [];
   while (state.pending.length) {
     const turn = state.pending.shift();
     await presentTurn(turn, ctl);
@@ -718,7 +722,7 @@ function resetCall() {
   state.mic.discard = true;
   stopMic();
   clearInterval(state.timerId);
-  Object.assign(state, { history: [], pending: [], turnCount: 0, requesting: false, awaiting: false, ended: false, speakerId: null, summary: null, lastRequest: null });
+  Object.assign(state, { history: [], pending: [], turnCount: 0, requesting: false, awaiting: false, ended: false, ending: false, speakerId: null, summary: null, lastRequest: null });
   state.mic.active = false;
   clearInterval(state.mic.ticker);
   $('chat').replaceChildren();
@@ -784,9 +788,10 @@ function wire() {
     sendAnswer(text);
   });
   $('wrap-btn').addEventListener('click', () => {
-    if (state.ended) return;
-    if (state.requesting) return;
-    sendAnswer($('reply').value, true);
+    if (state.ended || state.ending) return;
+    state.ending = true; // only one end request, but it can interrupt anything that is happening
+    $('wrap-btn').disabled = true;
+    sendAnswer($('reply').value, true); // cuts off the voices and drops any reply still on its way
   });
   $('retry-btn').addEventListener('click', () => state.lastRequest?.());
   $('leave-btn').addEventListener('click', leaveCall);
